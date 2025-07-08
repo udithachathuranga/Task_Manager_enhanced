@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  u_id     String @id @default(uuid())
+  u_name   String @unique
+  email    String @unique
+  role_id  String
+  role     Role   @relation(fields: [role_id], references: [r_id], onDelete: Cascade) 
+  hash_pwd String
+
+  tasks            Task[]         @relation("AddedTasks") 
+  created_projects Project[]      @relation("CreatedProjects") 
+  user_projects    User_project[] 
+  user_tasks       User_task[] 
+}
+
+model Project {
+  p_id           String         @id @default(uuid())
+  p_name         String         @unique
+  p_title        String
+  p_description  String
+  p_status_id    String
+  project_status Project_status @relation(fields: [p_status_id], references: [p_status_id], onDelete: Cascade) 
+  start_date     DateTime
+  end_date       DateTime
+  created_by_id  String
+  created_by     User           @relation("CreatedProjects", fields: [created_by_id], references: [u_id], onDelete: Cascade) // ✅ OK
+  user_projects  User_project[] 
+  tasks          Task[] 
+}
+
+model Task {
+  t_id           String      @id @default(uuid())
+  t_title        String
+  t_description  String
+  due_date       DateTime
+  time_estimate  Float
+  priority       Int
+  task_status_id String
+  task_status    Task_status @relation(fields: [task_status_id], references: [t_status_id], onDelete: Cascade) 
+  p_id           String
+  project        Project     @relation(fields: [p_id], references: [p_id], onDelete: Cascade) 
+  added_by_id    String
+  added_by       User        @relation("AddedTasks", fields: [added_by_id], references: [u_id], onDelete: Cascade) 
+  user_tasks     User_task[] 
+  timeSheets     TimeSheet[] 
+}
+
+model User_task {
+  ud_id          String   @id @default(uuid())
+  assigned       DateTime
+  related_to_id  String
+  related_to     Task     @relation(fields: [related_to_id], references: [t_id], onDelete: Cascade) 
+  assigned_to_id String
+  assigned_to    User     @relation(fields: [assigned_to_id], references: [u_id], onDelete: Cascade) 
+}
+
+model User_project {
+  up_id          String  @id @default(uuid())
+  project_id     String
+  project        Project @relation(fields: [project_id], references: [p_id], onDelete: Cascade)
+  assigned_to_id String
+  assigned_to    User    @relation(fields: [assigned_to_id], references: [u_id], onDelete: Cascade) 
+}
+
+model Role {
+  r_id      String @id
+  role_name String
+  users     User[] 
+}
+
+model Task_status {
+  t_status_id   String @id @default(uuid())
+  t_status_name String
+  tasks         Task[] 
+}
+
+model Project_status {
+  p_status_id   String    @id @default(uuid())
+  p_status_name String
+  projects      Project[] 
+}
+
+model TimeSheet {
+  tSheetId String   @id @default(uuid())
+  taskId   String
+  task     Task     @relation(fields: [taskId], references: [t_id], onDelete: Cascade)
+  date     DateTime
+  duration Float
+}
