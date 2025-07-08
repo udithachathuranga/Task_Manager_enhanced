@@ -24,8 +24,6 @@ export default function Home() {
   const [currentProjectId, setCurrentprojectId] = useState("");
 
   const router = useRouter();
-   
-  let res;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,13 +44,13 @@ export default function Home() {
 
         if (userRole === "1") {
           // Fetch all tasks
-          // const res = await fetch('/api/all_tasks');
+          const res = await fetch('/api/all_tasks');
           const data = await res.json();
           setTasklist(data);
           console.log("All tasks:", data);
         } else {
           // Fetch tasks for user
-          // const res = await fetch(`/api/user_tasks?user_id=${userId}`);
+          const res = await fetch(`/api/user_tasks?user_id=${userId}`);
           const tasks = await res.json();
           setTasklist(tasks);
           console.log("User tasks:", tasks);
@@ -79,9 +77,9 @@ export default function Home() {
 
   const handleLogout = async () => {
     try {
-      // const res = await fetch('/api/logout', {
-      //   method: 'POST',
-      // });
+      const res = await fetch('/api/logout', {
+        method: 'POST',
+      });
       const data = await res.json();
       console.log(data.message); // "Logged out"
       if (res.ok) {
