@@ -58,9 +58,12 @@ export default function Home() {
       } else {
         console.warn('No token found');
       }
+
+      await fetch('/api/create_admin');
     };
 
     fetchData();
+
   }, []);
 
 
