@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma'; // adjust to your path
+import bcrypt from 'bcrypt'
 
 export async function GET() {
   try {
@@ -7,9 +8,8 @@ export async function GET() {
     const u_name = 'uditha';
     const email = 'udithachathuranga99@gmail.com';
     const password = '1234'; // 🔐 hash this before inserting
-    const bcrypt = require('bcryptjs');
     const hash_pwd = await bcrypt.hash(password, 10);
-    const role_id = '1'; 
+    const role_id = '1';
 
     const user = await prisma.user.create({
       data: {
@@ -20,9 +20,9 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json({ message: 'Admin user created', user });
+    return NextResponse.json({ message: 'Admin created', user });
   } catch (err) {
-    console.error('Error creating admin:', err);
+    console.error("Admin creation error:", err); // 👈 log the real issue
     return NextResponse.json({ error: 'Failed to create admin' }, { status: 500 });
   }
 }
