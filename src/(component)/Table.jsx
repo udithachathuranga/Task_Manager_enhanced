@@ -27,6 +27,13 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   const rowRef = useRef(null);
   const newRowRef = useRef(null);
 
+  const colorMap = {
+    'Opened': 'bg-red-600',
+    'In Progress': 'bg-yellow-500',
+    'Completed': 'bg-green-500',
+  };
+
+  const colorClass = colorMap[name] || 'bg-gray-400';
 
   useEffect(() => {
     console.log("Opened Project: ", currentProjectId);
@@ -241,9 +248,9 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   };
 
   return (
-    <div className=" mb-3 rounded-lg bg-gray-200 dark:bg-gray-800 p-5">
-      <div className="bg-gray-300 dark:bg-gray-700 rounded-full w-40">
-        <h1 className="text-2xl mb-3 ml-4 px-1 py-1">{name}</h1>
+    <div className=" mt-3 rounded-lg bg-gray-200 dark:bg-gray-800 p-2">
+      <div className={`${colorClass} rounded-full w-40`}>
+        <h1 className="text-2xl mb-3 ml-4 px-1 text-white">{name}</h1>
       </div>
 
       <div className="relative overflow-x-auto">
@@ -284,11 +291,11 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   key={task.t_id}
                   onKeyPress={handleKeyPress}
                   ref={rowRef}
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-300"
+                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-300 "
                 >
 
                   {/* Task Name */}
-                  <td className="px-4 py-2">
+                  <td className="px-4">
                     <input
                       type="text"
                       id="taskTitle"
@@ -300,7 +307,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   </td>
 
                   {/* Assign Dropdown */}
-                  <td className="px-4 py-2 relative" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
+                  <td className="px-4 relative" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
                     <button
                       type="button"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 text-left"
@@ -342,7 +349,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   </td>
 
                   {/* Due Date */}
-                  <td className="px-4 py-2" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
+                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
                     <input
                       type="date"
                       id="dueDate"
@@ -353,7 +360,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   </td>
 
                   {/* Priority */}
-                  <td className="px-4 py-2" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
+                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
                     <input
                       type="number"
                       id="priority"
@@ -364,7 +371,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   </td>
 
                   {/* Task Status */}
-                  <td className="px-4 py-2" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
+                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
                     <select
                       id="taskStatusId"
                       className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
@@ -380,7 +387,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   </td>
 
                   {/* Time Estimate */}
-                  <td className="px-4 py-2" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
+                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
                     <input
                       type="number"
                       id="timeEstimate"
@@ -391,7 +398,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   </td>
 
                   {/* Save */}
-                  <td className="px-4 py-2 bg-blue-400" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
+                  <td className="px-4 bg-blue-400" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
                     <button
                       type="button"
                       className="bg-blue-500 text-black px-4 rounded-lg ml-3 hover:bg-red-800 z-0"
@@ -407,23 +414,23 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-300 z-0"
                 >
 
-                  <th onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                  <th onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} scope="row" className="px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                     {task.t_title}
                   </th>
 
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6 py-4">
+                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
                     {task.assigns?.join(', ')}
                   </td>
 
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6 py-4">
+                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
                     {new Date(task.due_date).toLocaleDateString()}
                   </td>
 
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6 py-4">
+                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
                     {task.priority}
                   </td>
 
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6 py-4">
+                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
                     {{
                       '1': 'Open',
                       '2': 'On-Going',
@@ -431,18 +438,18 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                     }[task.task_status_id] || 'Unknown'}
                   </td>
 
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6 py-4">
+                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
                     {task.time_estimate}
                   </td>
 
-                  <td className="px-6 py-4">
+                  <td className="px-6">
                     <button
                       type="button"
                       className="bg-blue-500 text-black px-4 rounded-lg hover:bg-red-800 z-0"
                       onClick={(e) => handleTaskOptionClick(e, task.t_id)}
                     >
-                      <svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 6h.01M12 12h.01M12 18h.01" />
+                      <svg className="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01" />
                       </svg>
 
                     </button>
@@ -461,7 +468,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
               >
 
                 {/* Task Name */}
-                <td className="px-4 py-2">
+                <td className="px-4">
                   <input
                     type="text"
                     id="taskTitle"
@@ -473,7 +480,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                 </td>
 
                 {/* Assign Dropdown */}
-                <td className="px-4 py-2 relative">
+                <td className="px-4 relative">
                   <button
                     type="button"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 text-left"
@@ -515,7 +522,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                 </td>
 
                 {/* Due Date */}
-                <td className="px-4 py-2">
+                <td className="px-4">
                   <input
                     type="date"
                     id="dueDate"
@@ -526,7 +533,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                 </td>
 
                 {/* Priority */}
-                <td className="px-4 py-2">
+                <td className="px-4">
                   <input
                     type="number"
                     id="priority"
@@ -537,7 +544,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                 </td>
 
                 {/* Task Status */}
-                <td className="px-4 py-2">
+                <td className="px-4">
                   <select
                     id="taskStatusId"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
@@ -553,7 +560,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                 </td>
 
                 {/* Time Estimate */}
-                <td className="px-4 py-2">
+                <td className="px-4">
                   <input
                     type="number"
                     id="timeEstimate"
@@ -562,7 +569,8 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                     onChange={(e) => setTimeEstimate(e.target.value)}
                   />
                 </td>
-                <td className="px-4 py-2">
+
+                <td className="px-4">
                   <button
                     type="button"
                     className="bg-blue-500 text-black px-4 rounded-lg ml-3 hover:bg-red-800 z-0"
@@ -576,11 +584,11 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
 
             {isEnableAddTask && !newRow &&
               <tr onClick={() => { setNewRow(true); }} className=" dark:bg-gray-800 cursor-pointer hover:bg-gray-300">
-                <th scope="row" className="flex px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                <th scope="row" className="flex px-6 py-3 font-medium text-gray-400 whitespace-nowrap dark:text-white">
                   <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
                   </svg>
-                  <span className="ms-3">Add a New Task</span>
+                  <span className="ms-3">Add Task</span>
                 </th>
               </tr>
             }
