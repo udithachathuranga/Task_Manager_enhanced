@@ -5,8 +5,8 @@ import bcrypt from 'bcrypt'
 export async function GET() {
   try {
     // Example user
-    const u_name = 'uditha';
-    const email = 'udithachathuranga99@gmail.com';
+    const u_name = 'admin';
+    const email = 'udithachathuranga999@gmail.com';
     const password = '1234'; // 🔐 hash this before inserting
     const hash_pwd = await bcrypt.hash(password, 10);
     const role_id = '1';

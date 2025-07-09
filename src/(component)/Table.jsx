@@ -248,9 +248,13 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   };
 
   return (
-    <div className=" mt-3 rounded-lg bg-gray-200 dark:bg-gray-800 p-2">
-      <div className={`${colorClass} rounded-full w-40`}>
-        <h1 className="text-2xl mb-3 ml-4 px-1 text-white">{name}</h1>
+    <div className=" mt-3 rounded-lg bg-white dark:bg-gray-800 p-2">
+      <div className={`${colorClass} rounded-full w-40 h-70`}>
+        <h1 className="text-1xl mb-3 ml-4 px-1 text-black">{name}</h1>
+      </div>
+
+      <div className="bg-blue-500 text-black px-4 py-2 rounded">
+        Hello, this is colored text!
       </div>
 
       <div className="relative overflow-x-auto">
@@ -414,8 +418,14 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                   className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-300 z-0"
                 >
 
-                  <th onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} scope="row" className="px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                  <th onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} scope="row" className="flex w-70 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                    <svg className="w-6 h-6 text-gray-300 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" >
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10l4 4 4-4" /></svg>
                     {task.t_title}
+                    <svg class="w-6 h-6 text-gray-300 dark:text-white align-right" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+
                   </th>
 
                   <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">

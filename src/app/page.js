@@ -59,7 +59,7 @@ export default function Home() {
         console.warn('No token found');
       }
 
-      await fetch('/api/create_admin');
+      //await fetch('/api/create_admin');  create admin user if not exists
     };
 
     fetchData();
@@ -102,12 +102,12 @@ export default function Home() {
       <div className="p-3 sm:ml-64">
         <div>
 
-          <div className="relative bg-gray-300 dark:bg-gray-700 rounded-lg text-gray-900  dark:text-white mb-3">
+          <div className="relative bg-white dark:bg-gray-700 rounded-lg text-gray-900  dark:text-white mb-3">
             <div className="flex py-4 rounded-md">
-              <h1 className="text-3xl font-bold text-white justify-center m-auto">{topic}</h1>
+              <h1 className="text-3xl font-bold text-black justify-center m-auto">{topic}</h1>
               <button
                 onClick={handleLogout}
-                className="absolute flex right-0 mx-5 rounded-full hover:bg-red-400 dark:hover:bg-red-500 p-2 text-white"
+                className="absolute flex right-0 mx-5 rounded-full hover:bg-red-400 dark:hover:bg-red-500 p-2 text-black"
               >
                 Log Out
                 <svg className=" ml-3 w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 16">
