@@ -3,6 +3,8 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef } from 'react'
 import { useState } from 'react';
 import OutsideClickWrapper from './OutsideClickWrapper';
+import Image from 'next/image';
+import Row from './Row';
 
 function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTask, currentProjectId, userId, setCurrentTask, setTasklist }) {
   const [newRow, setNewRow] = useState();
@@ -21,6 +23,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   const [editTaskId, setEditTaskId] = useState(null);
   const [editableTask, setEditableTask] = useState(null);
   const [isEditing, setIsEditing] = useState(true);
+  const [viewSubTasks, setViewSubTasks] = useState(false);
 
   const isEditingRef = useRef(isEditing);
   const router = useRouter();
@@ -28,12 +31,44 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   const newRowRef = useRef(null);
 
   const colorMap = {
-    'Opened': 'bg-red-600',
-    'In Progress': 'bg-yellow-500',
-    'Completed': 'bg-green-500',
+    'OPEN': 'bg-rose-600',
+    'IN PROGRESS': 'bg-indigo-600',
+    'COMPLETED': 'bg-teal-600',
+  };
+
+  const textColorMap = {
+    'OPEN': 'text-rose-600',
+    'IN PROGRESS': 'text-indigo-600',
+    'COMPLETED': 'text-teal-600',
+  };
+
+  const getIcon = (status, color) => {
+    switch (status) {
+      case 'OPEN':
+        return (
+          <svg className={`${color} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.583 8.445h.01M10.86 19.71l-6.573-6.63a.993.993 0 0 1 0-1.4l7.329-7.394A.98.98 0 0 1 12.31 4l5.734.007A1.968 1.968 0 0 1 20 5.983v5.5a.992.992 0 0 1-.316.727l-7.44 7.5a.974.974 0 0 1-1.384.001Z" />
+          </svg>
+        );
+      case 'IN PROGRESS':
+        return (
+          <svg className={`${color} dark:text-white`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        );
+      case 'COMPLETED':
+        return (
+          <svg className={`${color} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        );
+      default:
+        return null;
+    }
   };
 
   const colorClass = colorMap[name] || 'bg-gray-400';
+  const textClass = textColorMap[name] || 'text-gray-400';
 
   useEffect(() => {
     console.log("Opened Project: ", currentProjectId);
@@ -145,19 +180,6 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
     }
   }
 
-  const handleTaskOptionClick = (e, taskId) => {
-    e.preventDefault();
-    e.stopPropagation(); //prevent triggering parent onClick
-    console.log("Task ID clicked:", taskId);
-    setIsTaskOptionOpen(prev => {
-      if (taskId === prev?.taskId) {
-        return false; // Close if the same task
-      } else {
-        return { x: e.pageX, y: e.pageY, taskId };
-      }
-    });
-  };
-
   const deleteTask = (taskId) => {
     console.log("Deleting task with ID:", taskId);
     const confirmed = window.confirm("Are you sure you want to delete this project?");
@@ -249,12 +271,10 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
 
   return (
     <div className=" mt-3 rounded-lg bg-white dark:bg-gray-800 p-2">
-      <div className={`${colorClass} rounded-full w-40 h-70`}>
-        <h1 className="text-1xl mb-3 ml-4 px-1 text-black">{name}</h1>
-      </div>
 
-      <div className="bg-blue-500 text-black px-4 py-2 rounded">
-        Hello, this is colored text!
+      <div className={`flex items-center ${colorClass} rounded-lg w-fit h-70 mb-2`}>
+        <div className='px-3 py-2'> {getIcon(name, "text-white")} </div>
+        <h1 className="text-1xl mr-4 text-white">{name}</h1>
       </div>
 
       <div className="relative overflow-x-auto">
@@ -263,25 +283,35 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
 
           <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th scope="col" className="px-6 py-3">
-                Task
+              <th scope="col" className="px-6 py-3 w-[1000px]">
+                Task Name
               </th>
+              <th></th>
               <th scope="col" className="px-6 py-3">
-                Assigns
+                Project
               </th>
               <th scope="col" className="px-6 py-3">
                 Due date
               </th>
+              <th scope="col" className="pl-6 py-3 w-[400px]">
+                Assignee
+              </th>
               <th scope="col" className="px-6 py-3">
+                Date Created
+              </th>
+              <th scope="col" className="px-3 py-3">
+                Time Estimated
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Time Spent
+              </th>
+              <th scope="col" className="pl-6 py-3">
                 Priority
               </th>
-              <th scope="col" className="px-6 py-3">
-                Status
+              <th scope="col" className="pl-6 py-3">
+                Created By
               </th>
-              <th scope="col" className="px-6 py-3">
-                Time Estimation
-              </th>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="py-3 w-10">
                 {/* option */}
               </th>
             </tr>
@@ -289,186 +319,11 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
 
           <tbody>
 
-            {tasks?.map((task, index) =>
-              editTaskId === task.t_id ? (
-                <tr
-                  key={task.t_id}
-                  onKeyPress={handleKeyPress}
-                  ref={rowRef}
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-300 "
-                >
-
-                  {/* Task Name */}
-                  <td className="px-4">
-                    <input
-                      type="text"
-                      id="taskTitle"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                      value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
-                      required
-                    />
-                  </td>
-
-                  {/* Assign Dropdown */}
-                  <td className="px-4 relative" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
-                    <button
-                      type="button"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 text-left"
-                      onClick={() => setIsJobDropdownOpen(true)}
-                    >
-                      {assigns.length > 0 ? `${assigns.length} selected` : "Add User"}
-                      <span className="ml-1 float-right">▼</span>
-                    </button>
-
-                    {isJobDropdownOpen && (
-                      <OutsideClickWrapper onOutsideClick={() => setIsJobDropdownOpen(false)}>
-                        <div className="relative z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
-                          <div className="p-2">
-                            {usersInProject.map((user, index) => (
-                              <div key={task.t_id} className="px-3 py-1.5 hover:bg-gray-100 rounded text-gray-800">
-                                <label className="flex items-center cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    className="mr-2 h-4 w-4 accent-blue-600"
-                                    value={user.u_id}
-                                    checked={assigns.includes(user.u_id)}
-                                    onChange={(e) => {
-                                      const userId = user.u_id;
-                                      const updatedList = e.target.checked
-                                        ? [...assigns, userId]
-                                        : assigns.filter(id => id !== userId);
-                                      setAssigns(updatedList);
-                                    }}
-                                  />
-                                  <span className="text-gray-800">{user.u_name}</span>
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </OutsideClickWrapper>
-
-                    )}
-                  </td>
-
-                  {/* Due Date */}
-                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
-                    <input
-                      type="date"
-                      id="dueDate"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                    />
-                  </td>
-
-                  {/* Priority */}
-                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
-                    <input
-                      type="number"
-                      id="priority"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                      value={priority}
-                      onChange={(e) => setPriority(e.target.value)}
-                    />
-                  </td>
-
-                  {/* Task Status */}
-                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
-                    <select
-                      id="taskStatusId"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                      value={taskStatusId}
-                      onChange={(e) => setTaskStatusId(e.target.value)}
-                      required
-                    >
-                      <option value="">Select status</option>
-                      <option value="1">Open</option>
-                      <option value="2">On-Going</option>
-                      <option value="3">Done</option>
-                    </select>
-                  </td>
-
-                  {/* Time Estimate */}
-                  <td className="px-4" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
-                    <input
-                      type="number"
-                      id="timeEstimate"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                      value={timeEstimate}
-                      onChange={(e) => setTimeEstimate(e.target.value)}
-                    />
-                  </td>
-
-                  {/* Save */}
-                  <td className="px-4 bg-blue-400" onClick={() => { setTimeout(() => { setIsEditing(true); }, 500); }}>
-                    <button
-                      type="button"
-                      className="bg-blue-500 text-black px-4 rounded-lg ml-3 hover:bg-red-800 z-0"
-                      onClick={updateTask}
-                    >
-                      Save
-                    </button>
-                  </td>
-                </tr>
-              ) : (
-                <tr
-                  key={task.t_id}
-                  className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-300 z-0"
-                >
-
-                  <th onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} scope="row" className="flex w-70 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                    <svg className="w-6 h-6 text-gray-300 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" >
-                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10l4 4 4-4" /></svg>
-                    {task.t_title}
-                    <svg class="w-6 h-6 text-gray-300 dark:text-white align-right" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7.757v8.486M7.757 12h8.486M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                    </svg>
-
-                  </th>
-
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
-                    {task.assigns?.join(', ')}
-                  </td>
-
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
-                    {new Date(task.due_date).toLocaleDateString()}
-                  </td>
-
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
-                    {task.priority}
-                  </td>
-
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
-                    {{
-                      '1': 'Open',
-                      '2': 'On-Going',
-                      '3': 'Done'
-                    }[task.task_status_id] || 'Unknown'}
-                  </td>
-
-                  <td onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className="px-6">
-                    {task.time_estimate}
-                  </td>
-
-                  <td className="px-6">
-                    <button
-                      type="button"
-                      className="bg-blue-500 text-black px-4 rounded-lg hover:bg-red-800 z-0"
-                      onClick={(e) => handleTaskOptionClick(e, task.t_id)}
-                    >
-                      <svg className="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01" />
-                      </svg>
-
-                    </button>
-
-                  </td>
-
-                </tr>
-              )
-            )}
+            {tasks?.map((task, index) => (
+              <React.Fragment key={task.t_id}>
+                <Row task={task} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={0} />
+              </React.Fragment>
+            ))}
 
             {newRow &&
               <tr
@@ -594,7 +449,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
 
             {isEnableAddTask && !newRow &&
               <tr onClick={() => { setNewRow(true); }} className=" dark:bg-gray-800 cursor-pointer hover:bg-gray-300">
-                <th scope="row" className="flex px-6 py-3 font-medium text-gray-400 whitespace-nowrap dark:text-white">
+                <th scope="row" className="flex px-6 pt-3 font-medium text-gray-400 whitespace-nowrap dark:text-white">
                   <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
                   </svg>
@@ -607,24 +462,28 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
 
         </table>
 
-        {isTaskOptionOpen &&
-          <div className={`fixed z-10 right-0 top-1/2 mt-2 w-48 p-2 bg-white border rounded-md shadow-lg ${isTaskOptionOpen ? 'block' : 'hidden'}`}>
-            <ul className="py-1">
-              <li className="flex px-3 py-3 hover:bg-gray-100 cursor-pointer" onClick={() => { console.log("Edit Task"); setIsTaskOptionOpen(false); allowEditTask(isTaskOptionOpen.taskId) }}>
-                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
-                </svg>
-                Edit Task
-              </li>
-              <li className="flex px-3 py-3 hover:bg-gray-100 cursor-pointer" onClick={() => { console.log("Delete Task"); setIsTaskOptionOpen(false); deleteTask(isTaskOptionOpen.taskId) }}>
-                <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
-                </svg>
-                Delete Task
-              </li>
-            </ul>
-          </div>
-        }
+        <OutsideClickWrapper onOutsideClick={() => setIsTaskOptionOpen(false)}>
+          {isTaskOptionOpen &&
+            <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${isTaskOptionOpen ? 'block' : 'hidden'}`} style={{ top: `${isTaskOptionOpen.y + 40}px`, left: `${isTaskOptionOpen.x - 100}px`, position: 'fixed' }}>
+              <ul className="py-1">
+
+                <li className="flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer" onClick={() => { console.log("Edit Task"); setIsTaskOptionOpen(false); allowEditTask(isTaskOptionOpen.taskId) }}>
+                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
+                  </svg>
+                  Edit Task
+                </li>
+                <li className="flex items-center px-3 py-1 hover:bg-red-500 hover:text-white cursor-pointer" onClick={() => { console.log("Delete Task"); setIsTaskOptionOpen(false); deleteTask(isTaskOptionOpen.taskId) }}>
+                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
+                  </svg>
+                  Delete Task
+                </li>
+
+              </ul>
+            </div>
+          }
+        </OutsideClickWrapper>
 
       </div>
     </div >
