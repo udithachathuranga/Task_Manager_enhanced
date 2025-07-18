@@ -41,7 +41,7 @@ function Login() {
               type="text"
               id="username"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-              placeholder="John Doe"
+              placeholder="User name"
               value={u_name}
               onChange={(e) => setU_name(e.target.value)}
               required
@@ -56,6 +56,7 @@ function Login() {
               type="password"
               id="password"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              placeholder='Password'
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required

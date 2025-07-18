@@ -6,7 +6,7 @@ import OutsideClickWrapper from './OutsideClickWrapper';
 import Image from 'next/image';
 import Row from './Row';
 
-function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTask, currentProjectId, userId, setCurrentTask, setTasklist }) {
+function Table({ statusId, tasks, setShowDescription, showDescription, currentProjectId, userId, setCurrentTask, setTasklist }) {
   const [newRow, setNewRow] = useState();
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
@@ -14,7 +14,6 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   const [assigns, setAssigns] = useState([]);
   const [dueDate, setDueDate] = useState();
   const [priority, setPriority] = useState();
-  const [taskStatusId, setTaskStatusId] = useState();
   const [timeEstimate, setTimeEstimate] = useState(0);
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [usersInProject, setUsersInProject] = useState([]);
@@ -24,6 +23,13 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   const [editableTask, setEditableTask] = useState(null);
   const [isEditing, setIsEditing] = useState(true);
   const [viewSubTasks, setViewSubTasks] = useState(false);
+  const [showStatusList, setShowStatusList] = useState(false);
+  const [taskStatusId, setTaskStatusId] = useState(statusId);
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    status: '1',
+  });
 
   const isEditingRef = useRef(isEditing);
   const router = useRouter();
@@ -31,32 +37,38 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
   const newRowRef = useRef(null);
 
   const colorMap = {
-    'OPEN': 'bg-rose-600',
-    'IN PROGRESS': 'bg-indigo-600',
-    'COMPLETED': 'bg-teal-600',
+    '1': 'bg-rose-600',
+    '2': 'bg-indigo-600',
+    '3': 'bg-teal-600',
   };
 
   const textColorMap = {
-    'OPEN': 'text-rose-600',
-    'IN PROGRESS': 'text-indigo-600',
-    'COMPLETED': 'text-teal-600',
+    '1': 'text-rose-600',
+    '2': 'text-indigo-600',
+    '3': 'text-teal-600',
   };
 
-  const getIcon = (status, color) => {
-    switch (status) {
-      case 'OPEN':
+  const statusNameMap = {
+    '1': 'OPEN',
+    '2': 'ON GOING',
+    '3': 'COMPLETED',
+  };
+
+  const getIcon = (status_id, color) => {
+    switch (status_id) {
+      case '1':
         return (
           <svg className={`${color} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.583 8.445h.01M10.86 19.71l-6.573-6.63a.993.993 0 0 1 0-1.4l7.329-7.394A.98.98 0 0 1 12.31 4l5.734.007A1.968 1.968 0 0 1 20 5.983v5.5a.992.992 0 0 1-.316.727l-7.44 7.5a.974.974 0 0 1-1.384.001Z" />
           </svg>
         );
-      case 'IN PROGRESS':
+      case '2':
         return (
           <svg className={`${color} dark:text-white`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
         );
-      case 'COMPLETED':
+      case '3':
         return (
           <svg className={`${color} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
@@ -67,8 +79,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
     }
   };
 
-  const colorClass = colorMap[name] || 'bg-gray-400';
-  const textClass = textColorMap[name] || 'text-gray-400';
+  const colorClass = colorMap[statusId] || 'bg-gray-400';
 
   useEffect(() => {
     console.log("Opened Project: ", currentProjectId);
@@ -117,67 +128,48 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
     };
   }, [newRow]);
 
-
-  const handleKeyPress = async (e) => {
-    if (e.key === 'Enter') {
-      //create task
+  const saveTask = async () => {
+    try {
       const res = await fetch('/api/newtask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           t_title: taskTitle,
           t_description: "",
-          due_date: new Date(dueDate),
-          time_estimate: parseInt(timeEstimate, 10),
-          priority: parseInt(priority, 10),
+          due_date: null,
+          date_created: new Date(),
+          time_estimate: null,
+          priority: null,
           task_status_id: taskStatusId,
-          p_id: currentProjectId,
+          p_id: null,
           added_by_id: userId,
-          assigns
         }),
-      })
-
-      const newTask = res.json();
-      console.log("New Task hhhhhhhhh: ", newTask);
-      setTasklist(prev => [...prev, newTask]);
+      });
+      const newTask = await res.json(); // await is required here
+      console.log("new task: ",newTask);
       if (res.ok) {
-        alert("task created successfully");
-        //submits should be displayed in the table
+        console.log("New Task: ", newTask);
+        setTasklist(prev => [...prev, newTask]);
+        // setNewRow(false);
+        alert("Task created successfully");
       } else {
-        console.error("Error creating task:", errorData);
+        console.error("Error creating task:", newTask);
         alert("Failed to create task");
       }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred while creating the task.");
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      saveTask();
     }
   };
 
   const handleNewTaskSubmit = async () => {
-    //create task
-    const res = await fetch('/api/newtask', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        t_title: taskTitle,
-        t_description: "",
-        due_date: new Date(dueDate),
-        time_estimate: parseInt(timeEstimate, 10),
-        priority: parseInt(priority, 10),
-        task_status_id: taskStatusId,
-        p_id: currentProjectId,
-        added_by_id: userId,
-        assigns
-      }),
-    })
-
-    const result = await res.json();
-    console.log("ffffffffffffffff: ", result.task);
-    setTasklist(prev => [...prev, result.task]);
-    if (res.ok) {
-      alert("task created successfully");
-      //submits should be displayed in the table
-    } else {
-      console.error("Error creating task:", taskTitle);
-      alert("Failed to create task");
-    }
+    saveTask();
   }
 
   const deleteTask = (taskId) => {
@@ -269,12 +261,18 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
     );
   };
 
+  const handleStatusIconClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation(); //prevent triggering parent onClick
+    setShowStatusList({ x: e.pageX, y: e.pageY });
+  }
+
   return (
     <div className=" mt-3 rounded-lg bg-white dark:bg-gray-800 p-2">
 
       <div className={`flex items-center ${colorClass} rounded-lg w-fit h-70 mb-2`}>
-        <div className='px-3 py-2'> {getIcon(name, "text-white")} </div>
-        <h1 className="text-1xl mr-4 text-white">{name}</h1>
+        <div className='px-3 py-2'> {getIcon(taskStatusId, "text-white")} </div>
+        <h1 className="text-1xl mr-4 text-white">{statusNameMap[statusId] || 'UNKNOWN'}</h1>
       </div>
 
       <div className="relative overflow-x-auto">
@@ -321,7 +319,7 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
 
             {tasks?.map((task, index) => (
               <React.Fragment key={task.t_id}>
-                <Row task={task} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={0} />
+                <Row task={task} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={0} setTasklist={setTasklist} />
               </React.Fragment>
             ))}
 
@@ -329,127 +327,49 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
               <tr
                 onKeyPress={handleKeyPress}
                 ref={newRowRef}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-300"
+                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer"
               >
 
                 {/* Task Name */}
-                <td className="px-4">
-                  <input
-                    type="text"
-                    id="taskTitle"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    value={taskTitle}
-                    onChange={(e) => setTaskTitle(e.target.value)}
-                    required
-                  />
+                <td colSpan={4} className=" px-4 w-full">
+                  <div className='flex items-center w-full'>
+                    <div onClick={(e) => handleStatusIconClick(e)} className='px-2 py-2'> {getIcon(taskStatusId, textColorMap[taskStatusId])} </div>
+                    <input
+                      type="text"
+                      id="taskTitle"
+                      placeholder='Task name'
+                      className="text-gray-900 text-sm rounded-lg w-full px-2.5 py-1"
+                      value={taskTitle}
+                      onChange={(e) => setTaskTitle(e.target.value)}
+                      required
+                    />
+                  </div>
                 </td>
 
-                {/* Assign Dropdown */}
-                <td className="px-4 relative">
-                  <button
-                    type="button"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 text-left"
-                    onClick={() => setIsJobDropdownOpen(true)}
-                  >
-                    {assigns.length > 0 ? `${assigns.length} selected` : "Add User"}
-                    <span className="ml-1 float-right">▼</span>
-                  </button>
-
-                  {isJobDropdownOpen && (
-                    <OutsideClickWrapper onOutsideClick={() => setIsJobDropdownOpen(false)}>
-                      <div className="relative z-50 mt-1 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
-                        <div className="p-2">
-                          {usersInProject.map((user, index) => (
-                            <div key={user.u_id} className="px-3 py-1.5 hover:bg-gray-100 rounded text-gray-800">
-                              <label className="flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  className="mr-2 h-4 w-4 accent-blue-600"
-                                  value={user.u_id}
-                                  checked={assigns.includes(user.u_id)}
-                                  onChange={(e) => {
-                                    const userId = user.u_id;
-                                    const updatedList = e.target.checked
-                                      ? [...assigns, userId]
-                                      : assigns.filter(id => id !== userId);
-                                    setAssigns(updatedList);
-                                  }}
-                                />
-                                <span className="text-gray-800">{user.u_name}</span>
-                              </label>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </OutsideClickWrapper>
-
-                  )}
-                </td>
-
-                {/* Due Date */}
-                <td className="px-4">
-                  <input
-                    type="date"
-                    id="dueDate"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                  />
-                </td>
-
-                {/* Priority */}
-                <td className="px-4">
-                  <input
-                    type="number"
-                    id="priority"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    value={priority}
-                    onChange={(e) => setPriority(e.target.value)}
-                  />
-                </td>
-
-                {/* Task Status */}
-                <td className="px-4">
-                  <select
-                    id="taskStatusId"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    value={taskStatusId}
-                    onChange={(e) => setTaskStatusId(e.target.value)}
-                    required
-                  >
-                    <option value="">Select status</option>
-                    <option value="1">Open</option>
-                    <option value="2">On-Going</option>
-                    <option value="3">Done</option>
-                  </select>
-                </td>
-
-                {/* Time Estimate */}
-                <td className="px-4">
-                  <input
-                    type="number"
-                    id="timeEstimate"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-                    value={timeEstimate}
-                    onChange={(e) => setTimeEstimate(e.target.value)}
-                  />
-                </td>
-
-                <td className="px-4">
-                  <button
-                    type="button"
-                    className="bg-blue-500 text-black px-4 rounded-lg ml-3 hover:bg-red-800 z-0"
-                    onClick={handleNewTaskSubmit}
-                  >
-                    Save
-                  </button>
+                <td colSpan={4} className="px-2">
+                  <div className='flex items-center'>
+                    <button
+                      type="button"
+                      className="bg-white text-black border border-gray-200 px-2 py-1 mx-1 rounded-lg hover:bg-gray-200 z-0"
+                      onClick={handleNewTaskSubmit}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="bg-blue-400 text-black px-2 py-1 mx-1 rounded-lg hover:bg-blue-500 z-0"
+                      onClick={handleNewTaskSubmit}
+                    >
+                      Save
+                    </button>
+                  </div>
                 </td>
               </tr>
             }
 
-            {isEnableAddTask && !newRow &&
+            {!newRow &&
               <tr onClick={() => { setNewRow(true); }} className=" dark:bg-gray-800 cursor-pointer hover:bg-gray-300">
-                <th scope="row" className="flex px-6 pt-3 font-medium text-gray-400 whitespace-nowrap dark:text-white">
+                <th scope="row" className="flex px-6 py-2 font-medium text-gray-400 whitespace-nowrap dark:text-white">
                   <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
                   </svg>
@@ -481,6 +401,28 @@ function Table({ name, tasks, setShowDescription, showDescription, isEnableAddTa
                 </li>
 
               </ul>
+            </div>
+          }
+        </OutsideClickWrapper>
+
+        {/* Status List Dropdown */}
+        <OutsideClickWrapper onOutsideClick={() => setShowStatusList(false)}>
+          {showStatusList &&
+            <div ref={newRowRef} className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${showStatusList ? 'block' : 'hidden'}`} style={{ top: `${showStatusList.y + 20}px`, left: `${showStatusList.x - 15}px`, position: 'fixed' }}>
+              <ul className="py-1">
+                {Object.entries(statusNameMap).map(([key, value]) => (
+                  <li
+                    key={key}
+                    className="flex items-center hover:bg-gray-100 hover:cursor-pointer p-1"
+                    onClick={() => { setTaskStatusId(key); setShowStatusList(false); }}
+                  >
+                    <div className="mx-3">{getIcon(key, textColorMap[key])}</div>
+                    {value}
+                  </li>
+                ))}
+
+              </ul>
+
             </div>
           }
         </OutsideClickWrapper>

@@ -28,7 +28,7 @@ export async function POST(req) {
         })
         console.log("assigned users: ",assigns);
         for (const userId of assigns) {
-            const NewUser_project = await prisma.user_project.create({
+            const NewUser_project = await prisma.user_Project.create({
                 data: {
                     project_id: NewProject.p_id,
                     assigned_to_id: userId,

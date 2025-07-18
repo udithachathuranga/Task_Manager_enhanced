@@ -11,7 +11,7 @@ export async function GET(request) {
 
   try {
     // Step 1: Get related task IDs from User_task
-    const userTaskLinks = await prisma.user_task.findMany({
+    const userTaskLinks = await prisma.user_Task.findMany({
       where: {
         assigned_to_id: userId,
       },
@@ -40,7 +40,7 @@ export async function GET(request) {
     // Step 3: Add `assigns` field with user names and projectName
     const tasksWithAssigns = tasks.map((task,index) => ({
       ...task, index,
-      assigns: task.user_tasks.map((ut,index) => ut.assigned_to.u_name),
+      assigns: task.user_Tasks.map((ut,index) => ut.assigned_to.u_name),
       projectName: task.project?.p_name || null,
     }));
 

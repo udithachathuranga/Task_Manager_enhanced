@@ -8,11 +8,14 @@ export async function PUT(req) {
       t_title,
       t_description,
       due_date,
+      date_created,
       time_estimate,
       priority,
+      time_spent,
       task_status_id,
       p_id,
       added_by_id,
+      parent_task_id,
       assigns            // New list of user IDs to assign
     } = body;
 
@@ -25,22 +28,25 @@ export async function PUT(req) {
         t_title,
         t_description,
         due_date,
+        date_created,
         time_estimate,
         priority,
+        time_spent,
         task_status_id,
         p_id,
-        added_by_id
+        added_by_id,
+        parent_task_id,
       },
     });
 
     // 2. Delete previous assignments
-    await prisma.user_task.deleteMany({
+    await prisma.user_Task.deleteMany({
       where: { related_to_id: t_id }
     });
 
     // 3. Create new assignments
     for (const userId of assigns) {
-      await prisma.user_task.create({
+      await prisma.user_Task.create({
         data: {
           assigned: new Date(),
           related_to_id: t_id,

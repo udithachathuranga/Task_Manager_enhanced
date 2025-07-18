@@ -66,8 +66,6 @@ function NewProject() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 p_name,
-                p_title,
-                p_description,
                 p_status_id,
                 start_date,
                 end_date,
@@ -82,7 +80,7 @@ function NewProject() {
             router.push('/');
         } else {
             alert("Error in project submitting!!");
-            console.log("project was not submited!!");
+            console.log("project was not submited!");
         }
     };
 

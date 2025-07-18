@@ -15,7 +15,7 @@ export async function GET(request) {
 
   try {
     // Step 1: Find task IDs assigned to the user
-    const userTaskLinks = await prisma.user_task.findMany({
+    const userTaskLinks = await prisma.user_Task.findMany({
       where: {
         assigned_to_id: userId,
       },

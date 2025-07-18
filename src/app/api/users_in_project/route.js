@@ -13,7 +13,7 @@ export async function GET(request) {
   }
 
   try {
-    const users = await prisma.user_project.findMany({
+    const users = await prisma.user_Project.findMany({
       where: {
         project_id: projectId,
       },
