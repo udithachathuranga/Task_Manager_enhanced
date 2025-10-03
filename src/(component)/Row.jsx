@@ -31,7 +31,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             due_date: "2025-07-20",
             priority: 1,
             task_status_id: "1", // Open
-            time_estimate: 5
+            time_estimate: 5,
+            due_date: "2025-07-20",
         },
         {
             t_id: 2,
@@ -40,7 +41,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             due_date: "2025-07-18",
             priority: 2,
             task_status_id: "2", // On-Going
-            time_estimate: 10
+            time_estimate: 10,
+            due_date: "2025-07-17T08:24:00.842Z",
         },
         {
             t_id: 2,
@@ -49,7 +51,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             due_date: "2025-07-18",
             priority: 2,
             task_status_id: "3", // Completed
-            time_estimate: 10
+            time_estimate: 10,
+            due_date: "2025-07-20",
         }
     ]);
 
@@ -373,6 +376,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 <td onClick={() => { setCurrentTask(task); }} className="px-6">
                     <div className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
                         {new Date(task.date_created).toLocaleDateString()}
+                        {/* {task.date_created} */}
                     </div>
                 </td>
 
