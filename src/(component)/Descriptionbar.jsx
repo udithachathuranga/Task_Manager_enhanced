@@ -137,6 +137,34 @@ function Descriptionbar({ currentTask, role, setShowDescription }) {
     }
   };
 
+  const updateDescription = () => {
+    
+  }
+
+  const saveTask = async () => {
+    try {
+      const res = await fetch('/api/newtask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          t_title: taskTitle,
+          t_description: taskDescription,
+        }),
+      });
+      const newTask = await res.json(); // await is required here
+      if (res.ok) {
+        setTasklist(prev => [...prev, newTask]);
+        // setNewRow(false);
+      } else {
+        console.error("Error creating task:", newTask);
+        alert("Failed to create task");
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      alert("An unexpected error occurred while creating the task.");
+    }
+  };
+
   return (
     <aside id="separator-sidebar" className="fixed rounded-lg top-0 right-0 z-40 w-1/2 h-screen transition-transform -translate-x-full sm:translate-x-0 border-l border-black dark:border-white" aria-label="Sidebar">
 
@@ -166,28 +194,36 @@ function Descriptionbar({ currentTask, role, setShowDescription }) {
           </div>
         </div>
 
-
-
         <div className='relative bg-gray-100 rounded-lg w-full h-20 px-2 py-auto my-5'>
           <div className="flex items-center h-full px-4 w-[calc(100%-20px)]">
             {editDescription ? (
               <OutsideClickWrapper onOutsideClick={() => setEditDescription(false)}>
-                <input
-                  type="text"
-                  id="taskTitle"
-                  placeholder='Add Description'
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-[650px] p-2.5"
-                  value={taskDescription}
-                  onChange={(e) => setTaskDescription(e.target.value)}
-                />
+                <div className='flex items-center'>
+                  <input
+                    type="text"
+                    id="taskTitle"
+                    placeholder='Add Description'
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-[500px] p-2.5"
+                    value={taskDescription}
+                    onChange={(e) => setTaskDescription(e.target.value)}
+                  />
+                  <button
+                    className='px-3 py-1 bg-blue-400 hover:bg-blue-500 rounded-lg m-5'
+                    onClick={() => { updateDescription() }}
+                  >
+                    save
+                  </button>
+                </div>
               </OutsideClickWrapper>
             ) : (
-              <p onClick={() => { setEditDescription(true) }} className='text-left text-gray-400'>{currentTask.t_description ? currentTask.t_description : "+ Add Description"}</p>
+              <div>
+                <p onClick={() => { setEditDescription(true) }} className='text-left text-gray-400'>{currentTask.t_description ? currentTask.t_description : "+ Add Description"}</p>
+                <svg onClick={() => { setEditDescription(true) }} className="absolute m-4 right-0 bottom-0 w-6 h-6 text-gray-600 dark:text-white z-50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
+                </svg>
+              </div>
             )}
           </div>
-          <svg onClick={() => { setEditDescription(true) }} className="absolute m-4 right-0 bottom-0 w-6 h-6 text-gray-600 dark:text-white z-50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
-          </svg>
         </div>
 
         <table className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white mt-4 p-4 w-full">

@@ -175,24 +175,16 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
     };
 
     return (
-        <aside id="separator-sidebar" className="top-0 left-0 w-64 h-screen overflow-y-auto transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
-
-
-
-
-            <div className="px-3 py-4 overflow-y-auto bg-gray-100 dark:bg-gray-800">
-
+        <aside id="separator-sidebar" className="top-0 left-0 w-64 h-screen bg-gray-100 dark:bg-gray-800 overflow-y-auto transition-transform -translate-x-full sm:translate-x-0" aria-label="Sidebar">
+            <div className="px-3 py-4 overflow-y-auto">
                 <Image className="rounded-lg shadow-xl" src="/images/eblix.jpg" width={100} height={40} alt="eBlix Logo" />
                 <div className='bg-gray-300 h-1 w-full mt-4 rounded-full'>
-
                 </div>
-
                 <div className="absolute top-0 right-0 p-4" onClick={() => setViewSidebar(false)}>
                     <svg className=" w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.99994 10 7 11.9999l1.99994 2M12 5v14M5 4h14c.5523 0 1 .44772 1 1v14c0 .5523-.4477 1-1 1H5c-.55228 0-1-.4477-1-1V5c0-.55228.44772-1 1-1Z" />
                     </svg>
                 </div>
-
                 {/*All*/}
                 <ul className="pt-4 mb-8 space-y-2 font-medium">
                     <li className='hover:cursor-pointer hover:shadow-md'>
@@ -204,7 +196,6 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                         </div>
                     </li>
                 </ul>
-
                 {/* all projects */}
                 <div className='border-t border-white'>
                     <div className="bg-gray-300 dark:bg-gray-700 text-gray-900  dark:text-white">
@@ -231,7 +222,6 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                             </li>
                         ))}
                     </ul>
-
 
                     {/* adding a new project */}
                     {role == "1" &&

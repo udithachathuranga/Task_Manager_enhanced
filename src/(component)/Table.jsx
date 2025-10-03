@@ -15,6 +15,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   const [dueDate, setDueDate] = useState();
   const [priority, setPriority] = useState();
   const [timeEstimate, setTimeEstimate] = useState(0);
+  const [description, setDescription] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [usersInProject, setUsersInProject] = useState([]);
   const [isJobDropdownOpen, setIsJobDropdownOpen] = useState(false);
@@ -141,17 +142,15 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
           time_estimate: null,
           priority: null,
           task_status_id: taskStatusId,
-          p_id: null,
+          p_id: currentProjectId,
           added_by_id: userId,
         }),
       });
+      console.log("ddddddddddddddda; ", res);
       const newTask = await res.json(); // await is required here
-      console.log("new task: ",newTask);
       if (res.ok) {
-        console.log("New Task: ", newTask);
         setTasklist(prev => [...prev, newTask]);
         // setNewRow(false);
-        alert("Task created successfully");
       } else {
         console.error("Error creating task:", newTask);
         alert("Failed to create task");
@@ -165,11 +164,14 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       saveTask();
+      setNewRow(false);
     }
   };
 
   const handleNewTaskSubmit = async () => {
+    setNewRow(false);
     saveTask();
+    window.location.reload();
   }
 
   const deleteTask = (taskId) => {
@@ -185,7 +187,6 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
       })
         .then(res => {
           if (res.ok) {
-            alert("Task deleted successfully");
             setTasklist(prev => prev.filter(task => task.t_id !== taskId));
           } else {
             throw new Error("Failed to delete task");
@@ -285,7 +286,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
                 Task Name
               </th>
               <th></th>
-              <th scope="col" className="px-6 py-3">
+              <th scope="col" className="px-6 py-3 w-96">
                 Project
               </th>
               <th scope="col" className="px-6 py-3">
@@ -351,7 +352,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
                     <button
                       type="button"
                       className="bg-white text-black border border-gray-200 px-2 py-1 mx-1 rounded-lg hover:bg-gray-200 z-0"
-                      onClick={handleNewTaskSubmit}
+                      onClick={()=>{setNewRow(false)}}
                     >
                       Cancel
                     </button>
@@ -371,7 +372,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
               <tr onClick={() => { setNewRow(true); }} className=" dark:bg-gray-800 cursor-pointer hover:bg-gray-300">
                 <th scope="row" className="flex px-6 py-2 font-medium text-gray-400 whitespace-nowrap dark:text-white">
                   <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 1v16M1 9h16" />
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
                   </svg>
                   <span className="ms-3">Add Task</span>
                 </th>

@@ -100,12 +100,11 @@ export default function Home() {
     <div className="flex">
       {viewSideBar && (<Sidebar user_id={u_id} role={role} setTasklist={setTasklist} setTopic={setTopic} setIsEnableAddTask={setIsEnableAddTask} setCurrentProjectId={setCurrentprojectId} setViewSidebar={setViewSidebar} />)}
 
-      {/* Expand Sidebar */}
+      {/* Expand Sidebar Icon*/}
       {!viewSideBar && (
         <svg onClick={() => { setViewSidebar(true) }} className="absolute w-6 h-6 m-5 text-gray-800 dark:text-white scale-x-[-1] z-50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.99994 10 7 11.9999l1.99994 2M12 5v14M5 4h14c.5523 0 1 .44772 1 1v14c0 .5523-.4477 1-1 1H5c-.55228 0-1-.4477-1-1V5c0-.55228.44772-1 1-1Z" />
         </svg>
-
       )}
 
       <div className={`p-3 ${viewSideBar ? 'w-[calc(100%-16rem)]' : 'w-full'} h-screen overflow-y-auto`}>
@@ -126,7 +125,7 @@ export default function Home() {
 
             </div>
           </div>
-          
+
           {/* Tables */}
           <Table statusId="1" tasks={completedTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"red-500"} />
           <Table statusId="2" tasks={ongoingTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"green-200"} />
@@ -135,8 +134,9 @@ export default function Home() {
         </div>
 
         {/* Description Bar */}
-        <div className="bottom-0 right-0 w-full rounded-lg bg-gray-200 dark:bg-gray-800 p-4 border-l border-black dark:border-white">
-          {showDescription &&
+
+        {showDescription &&
+          <div className="bottom-0 right-0 w-full rounded-lg bg-gray-200 dark:bg-gray-800 p-4 border-l border-black dark:border-white">
             <OutsideClickWrapper onOutsideClick={() => setShowDescription(false)}>
               <div className="fixed rounded-lg inset-0 z-30">
                 {/* Dark overlay */}
@@ -148,9 +148,8 @@ export default function Home() {
                 <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} />
               </div>
             </OutsideClickWrapper>
-          }
-        </div>
-
+          </div>
+        }
       </div>
     </div>
   );
