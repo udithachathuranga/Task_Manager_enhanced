@@ -10,7 +10,6 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const [timeEstimate, setTimeEstimate] = useState(task.time_estimate);
     const [priority, setPriority] = useState(task.priority);
     const [timeSpent, setTimeSpent] = useState(task.time_spent);
-    const [statusId, setStatusId] = useState(task.task_status_id);
     const [assigns, setAssigns] = useState(task.assigns);
 
     const [editTaskTitle, setEditTaskTitle] = useState(false);
@@ -32,7 +31,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             priority: 1,
             task_status_id: "1", // Open
             time_estimate: 5,
-            due_date: "2025-07-20",
+            date_created: "2025-07-20",
         },
         {
             t_id: 2,
@@ -42,7 +41,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             priority: 2,
             task_status_id: "2", // On-Going
             time_estimate: 10,
-            due_date: "2025-07-17T08:24:00.842Z",
+            date_created: "2025-07-20",
         },
         {
             t_id: 2,
@@ -52,7 +51,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             priority: 2,
             task_status_id: "3", // Completed
             time_estimate: 10,
-            due_date: "2025-07-20",
+            date_created: "2025-07-20",
         }
     ]);
 
@@ -194,12 +193,12 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 body: JSON.stringify({
                     t_id: task.t_id,
                     t_title: taskTitle,
-                    due_date: dueDate,
+                    due_date: new Date(dueDate).toISOString(),
                     date_created: dateCreated,
                     time_estimate: parseInt(timeEstimate, 10),
                     priority: task.priority,//parseInt(priority, 10),
                     time_spent: parseInt(timeSpent, 10),
-                    task_status_id: statusId,
+                    task_status_id: task.task_status_id,
                     p_id: task.p_id,
                     added_by_id: task.added_by_id,
                     assigns: assigns
@@ -209,6 +208,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             if (res.ok) {
                 const responce = await res.json();
                 const updatedTask = responce.task;
+                updatedTask.project = task.project;
+                updatedTask.added_by = task.added_by;
                 console.log("updated task responce: ", updatedTask);
                 setTasklist(prev => prev.map(t => t.t_id === task.t_id ? updatedTask : t));
             } else {
@@ -335,7 +336,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
                 <td className="px-5">
                     <div onClick={() => { setCurrentTask(task); }} className="w-full py-1 border border-transparent hover:border-gray-400 rounded">
-                        {task.project?.p_name ?? ""}
+                        {task.project?.p_name ?? "kkkk"}
                     </div>
                 </td>
 
@@ -346,8 +347,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                             <input
                                 type="date"
                                 id="due_date"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                                placeholder="YYYY-MM-DD"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-fit px-2.5 py-1"
+                                // placeholder="YYYY-MM-DD"
                                 value={dueDate}
                                 onChange={(e) => setDueDate(e.target.value)}
                             //required
@@ -355,7 +356,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                         </OutsideClickWrapper>
                     ) : (
                         <div onClick={() => setEditDueDate(true)} className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
-                            {new Date(task.due_date).toLocaleDateString()}
+                            {/* {new Date(task.due_date).toLocaleDateString()} */}
+                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : "due"}
                         </div>
                     )}
 
@@ -386,7 +388,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                 type="number"
                                 id="timeEstimate"
                                 placeholder='Time Estimate'
-                                className="text-gray-900 font-bold text-sm rounded-sm w-40"
+                                className="text-gray-900 text-sm rounded-sm w-40 p-1.5"
                                 value={timeEstimate}
                                 onChange={(e) => setTimeEstimate(e.target.value)}
                             />
@@ -435,12 +437,15 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     </div>
                 </td>
 
-                <td onClick={() => { setCurrentTask(task); }} className="px-6">
-                    {/* {task.assigns?.join(', ')} */}
-                    <div className="relative flex group/avatar -space-x-1 rtl:space-x-reverse">
-                        <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
+                <td
+                    onClick={() => {setCurrentTask(task);}} className="px-6">
+                    <div className="relative flex items-center space-x-2">
+                        <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold uppercase" title={task.added_by?.u_name}>
+                            {task.added_by?.u_name?.substring(0, 2) || "NA"}
+                        </div>
                     </div>
                 </td>
+
 
                 <td className=" w-10">
                     <div className="w-fit px-2 border border-transparent hover:border-gray-400 rounded">
@@ -554,9 +559,9 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${showStatusList ? 'block' : 'hidden'}`} style={{ top: `${showStatusList.y + 20}px`, left: `${showStatusList.x - 15}px`, position: 'fixed' }}>
                         <ul className="py-1">
                             {Object.entries(statusName).map(([key, value], index) => (
-                                <li key={key} className="flex items-center hover:bg-gray-100 hover:cursor-pointer p-1">
+                                <li key={key} className="flex items-center hover:bg-gray-100 hover:cursor-pointer p-1" onClick={() => {setShowStatusList(false); task.task_status_id = key; updateTask();}}>
                                     <div className='mx-3'>{getIcon(key)}</div>
-                                    {value}
+                                    <strong>{value}</strong>
                                 </li>
                             ))}
                         </ul>

@@ -1,0 +1,65 @@
+[33mcommit 0c33a2dd2b4c91bab6577d61b1f54d2935b4df4b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Fri Oct 3 09:07:27 2025 +0530
+
+    latest project
+
+[33mcommit 8ba40051df0e9beeb3eac4fed822077d7a3316b7[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Fri Jul 18 11:59:07 2025 +0530
+
+    updated database, task module
+
+[33mcommit 57a97a63d317c8e6f64744192dffb3f37f59208f[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Wed Jul 16 11:21:58 2025 +0530
+
+    Enhanced uI
+
+[33mcommit 9b199a05fac1ebb4aa22cba93d0c7cd0df1bef8f[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Wed Jul 9 15:37:47 2025 +0530
+
+    test
+
+[33mcommit f889a9f49b29a18b0da15ce899cbffced6084d21[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Wed Jul 9 11:13:20 2025 +0530
+
+    import bcrypt
+
+[33mcommit d58285c640fb63a248450048c7e834bf96bd7a68[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Wed Jul 9 10:55:13 2025 +0530
+
+    create admin in the home page
+
+[33mcommit c2ebc766d01d21c7840b3a967cb33ca3e0b2209e[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Wed Jul 9 10:36:01 2025 +0530
+
+    create admin api
+
+[33mcommit c09aeafe46d7e4fd2b4313c236f0fdeccc2e6527[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Wed Jul 9 10:05:37 2025 +0530
+
+    styles for home page
+
+[33mcommit b313e965d99fbad8c8ce591e98d8235977e8fedb[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Tue Jul 8 15:13:32 2025 +0530
+
+    updated package json to generate prisma
+
+[33mcommit 757fda1bb6453638f8b53e807e8108d04e5e9705[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Tue Jul 8 14:56:57 2025 +0530
+
+    testing
+
+[33mcommit d6963578f9534f913ec5a9652e77c8281c0c80b7[m
+Author: uditha <udithachathuranga99@email.com>
+Date:   Tue Jul 8 14:44:54 2025 +0530
+
+    initial project

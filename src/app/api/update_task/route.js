@@ -33,7 +33,6 @@ export async function PUT(req) {
         priority,
         time_spent,
         task_status_id,
-        p_id,
         added_by_id,
         parent_task_id,
       },
@@ -45,14 +44,16 @@ export async function PUT(req) {
     });
 
     // 3. Create new assignments
-    for (const userId of assigns) {
-      await prisma.user_Task.create({
-        data: {
-          assigned: new Date(),
-          related_to_id: t_id,
-          assigned_to_id: userId
-        }
-      });
+    if (assigns && Array.isArray(assigns)) {
+      for (const userId of assigns) {
+        await prisma.user_Task.create({
+          data: {
+            assigned: new Date(),
+            related_to_id: t_id,
+            assigned_to_id: userId
+          }
+        });
+      }
     }
 
     console.log('Task Updated:', updatedTask);

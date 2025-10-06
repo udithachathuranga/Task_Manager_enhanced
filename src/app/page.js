@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode";
 import { useFormStatus } from "react-dom";
 import OutsideClickWrapper from '../(component)/OutsideClickWrapper';
 
+
 export default function Home() {
 
   const [role, setRole] = useState("");
@@ -98,21 +99,16 @@ export default function Home() {
 
   return (
     <div className="flex">
-      {viewSideBar && (<Sidebar user_id={u_id} role={role} setTasklist={setTasklist} setTopic={setTopic} setIsEnableAddTask={setIsEnableAddTask} setCurrentProjectId={setCurrentprojectId} setViewSidebar={setViewSidebar} />)}
+      <Sidebar user_id={u_id} role={role} setTasklist={setTasklist} setTopic={setTopic} setIsEnableAddTask={setIsEnableAddTask} setCurrentProjectId={setCurrentprojectId} viewSideBar={viewSideBar} setViewSidebar={setViewSidebar} />
 
-      {/* Expand Sidebar Icon*/}
-      {!viewSideBar && (
-        <svg onClick={() => { setViewSidebar(true) }} className="absolute w-6 h-6 m-5 text-gray-800 dark:text-white scale-x-[-1] z-50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" >
-          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.99994 10 7 11.9999l1.99994 2M12 5v14M5 4h14c.5523 0 1 .44772 1 1v14c0 .5523-.4477 1-1 1H5c-.55228 0-1-.4477-1-1V5c0-.55228.44772-1 1-1Z" />
-        </svg>
-      )}
-
-      <div className={`p-3 ${viewSideBar ? 'w-[calc(100%-16rem)]' : 'w-full'} h-screen overflow-y-auto`}>
+      <div className={`${viewSideBar ? 'w-[calc(100%-16rem)]' : 'w-full'} h-screen overflow-y-auto`}>
         <div>
 
           <div className="relative bg-white dark:bg-gray-700 rounded-lg text-gray-900  dark:text-white mb-3">
-            <div className="flex py-4 bg-gradient-to-r from-slate-500 to-white mx-2">
-              <h1 className="text-3xl font-bold text-black ml-8">{topic}</h1>
+            <div className="flex py-2 bg-gray-200 dark:bg-gray-800 border-b border-gray-300">
+              <div className="bg-gray-500 mx-5 px-10 py-3 rounded-full w-96">
+                <h1 className="text-3xl font-bold text-gray-200 text-center">{topic}</h1>
+              </div>
               <button
                 onClick={handleLogout}
                 className="absolute flex right-0 mx-5 rounded-full hover:bg-red-400 dark:hover:bg-red-500 p-2 text-black"
@@ -125,12 +121,12 @@ export default function Home() {
 
             </div>
           </div>
-
-          {/* Tables */}
-          <Table statusId="1" tasks={completedTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"red-500"} />
-          <Table statusId="2" tasks={ongoingTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"green-200"} />
-          <Table statusId="3" tasks={openTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"blue-300"} />
-
+          <div className="m-5">
+            {/* Tables */}
+            <Table statusId="1" tasks={completedTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"red-500"} />
+            <Table statusId="2" tasks={ongoingTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"green-200"} />
+            <Table statusId="3" tasks={openTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} color={"blue-300"} />
+          </div>
         </div>
 
         {/* Description Bar */}

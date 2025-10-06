@@ -269,7 +269,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   }
 
   return (
-    <div className=" mt-3 rounded-lg bg-white dark:bg-gray-800 p-2">
+    <div className=" mt-3 rounded-lg bg-white dark:bg-gray-800">
 
       <div className={`flex items-center ${colorClass} rounded-lg w-fit h-70 mb-2`}>
         <div className='px-3 py-2'> {getIcon(taskStatusId, "text-white")} </div>
@@ -383,6 +383,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
 
         </table>
 
+        {/* Task Option Dropdown */}
         <OutsideClickWrapper onOutsideClick={() => setIsTaskOptionOpen(false)}>
           {isTaskOptionOpen &&
             <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${isTaskOptionOpen ? 'block' : 'hidden'}`} style={{ top: `${isTaskOptionOpen.y + 40}px`, left: `${isTaskOptionOpen.x - 100}px`, position: 'fixed' }}>

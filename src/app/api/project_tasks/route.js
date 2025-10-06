@@ -21,6 +21,7 @@ export async function GET(request) {
           },
         },
         project: true,  // include related project data
+        added_by: true // include user who added the task
       },
     });
 
