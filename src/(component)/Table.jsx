@@ -144,12 +144,13 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
           task_status_id: taskStatusId,
           p_id: currentProjectId,
           added_by_id: userId,
+          parent_task_id: null,
         }),
       });
-      console.log("ddddddddddddddda; ", res);
+
       const newTask = await res.json(); // await is required here
       if (res.ok) {
-        setTasklist(prev => [...prev, newTask]);
+        setTasklist(prev => [...prev, newTask.task]);
         // setNewRow(false);
       } else {
         console.error("Error creating task:", newTask);
@@ -171,7 +172,6 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   const handleNewTaskSubmit = async () => {
     setNewRow(false);
     saveTask();
-    window.location.reload();
   }
 
   const deleteTask = (taskId) => {
@@ -319,8 +319,8 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
           <tbody>
 
             {tasks?.map((task, index) => (
-              <React.Fragment key={task.t_id}>
-                <Row task={task} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={0} setTasklist={setTasklist} />
+              <React.Fragment>
+                <Row task={task} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={0} setTasklist={setTasklist} userId={userId} parentTaskId={null} />
               </React.Fragment>
             ))}
 
@@ -343,6 +343,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
                       value={taskTitle}
                       onChange={(e) => setTaskTitle(e.target.value)}
                       required
+                      autoFocus
                     />
                   </div>
                 </td>
@@ -352,7 +353,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
                     <button
                       type="button"
                       className="bg-white text-black border border-gray-200 px-2 py-1 mx-1 rounded-lg hover:bg-gray-200 z-0"
-                      onClick={()=>{setNewRow(false)}}
+                      onClick={() => { setNewRow(false) }}
                     >
                       Cancel
                     </button>

@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Image from 'next/image';
 import OutsideClickWrapper from '../(component)/OutsideClickWrapper';
 
-function Row({ task, showDescription, setShowDescription, setCurrentTask, subLevel, setTasklist }) {
+function Row({ task, showDescription, setShowDescription, setCurrentTask, subLevel, setTasklist, userId, parentTaskId, setParentSubTaskList }) {
+
+    const newRowRef = useRef(null);
 
     const [taskTitle, setTaskTitle] = useState(task.t_title);
     const [dueDate, setDueDate] = useState(task.due_date);
@@ -10,54 +12,46 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const [timeEstimate, setTimeEstimate] = useState(task.time_estimate);
     const [priority, setPriority] = useState(task.priority);
     const [timeSpent, setTimeSpent] = useState(task.time_spent);
-    const [assigns, setAssigns] = useState(task.assigns);
+    const [assigns, setAssigns] = useState([]);
 
     const [editTaskTitle, setEditTaskTitle] = useState(false);
     const [editDueDate, setEditDueDate] = useState(false);
     const [editTimeEstimate, setEditTimeEstimate] = useState(false);
     const [editTimeSpent, setEditTimeSpent] = useState(false);
+    const [newRow, setNewRow] = useState(false);
 
     const [viewSubTasks, setViewSubTasks] = useState(false);
     const [showProjectUsers, setShowProjectUsers] = useState(false);
     const [showPriorityList, setShowPriorityList] = useState(false);
     const [showStatusList, setShowStatusList] = useState(false);
     const [isTaskOptionOpen, setIsTaskOptionOpen] = useState(false);
-    const [subtasks, setSubTasks] = useState([
-        {
-            t_id: 1,
-            t_title: "Design landing page",
-            assigns: ["Alice", "Bob"],
-            due_date: "2025-07-20",
-            priority: 1,
-            task_status_id: "1", // Open
-            time_estimate: 5,
-            date_created: "2025-07-20",
-        },
-        {
-            t_id: 2,
-            t_title: "Setup backend API",
-            assigns: ["Charlie"],
-            due_date: "2025-07-18",
-            priority: 2,
-            task_status_id: "2", // On-Going
-            time_estimate: 10,
-            date_created: "2025-07-20",
-        },
-        {
-            t_id: 2,
-            t_title: "Setup backend API",
-            assigns: ["Charlie"],
-            due_date: "2025-07-18",
-            priority: 2,
-            task_status_id: "3", // Completed
-            time_estimate: 10,
-            date_created: "2025-07-20",
-        }
-    ]);
+    const [usersInProject, setUsersInProject] = useState();
+    const [subtasks, setSubTasks] = useState([]);
 
     useEffect(() => {
-        //const subtasks = fetch sub tasks related to task id
+        const fetchData = async () => {
+            const res = await fetch(`/api/sub_tasks?parent_task_id=${task.t_id}`);
+            const data = await res.json();
+            console.log("Sub tasks:", data);
+            setSubTasks(data);
+        };
+        fetchData();
+        setAssigns(task.assigns);
     }, []);
+
+    useEffect(() => {
+        function handleClickNewRowOutside(event) {
+            if (newRowRef.current && !newRowRef.current.contains(event.target)) {
+                setNewRow(false);
+            }
+        }
+        if (newRow !== null) {
+            document.addEventListener("mousedown", handleClickNewRowOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickNewRowOutside);
+        };
+    }, [newRow]);
 
     const colorMap = {
         '1': 'bg-rose-600',
@@ -106,6 +100,48 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const textClass = textColorMap[name] || 'text-gray-400';
     const marginLeft = 4 + 50 * subLevel;
     subLevel++;
+
+    const saveTask = async () => {
+        try {
+            console.log("parent task id 2: ", task.t_id);
+            const res = await fetch('/api/newtask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    t_title: taskTitle,
+                    t_description: "",
+                    due_date: null,
+                    date_created: new Date(),
+                    time_estimate: null,
+                    priority: null,
+                    task_status_id: "1",
+                    p_id: task.p_id,
+                    added_by_id: userId,
+                    parent_task_id: task.t_id,
+                }),
+            });
+
+            const newTask = await res.json(); // await is required here
+            if (res.ok) {
+                console.log("New task created:", newTask);
+                setSubTasks(prev => [...prev, newTask.task]);
+                // setNewRow(false);
+            } else {
+                console.error("Error creating task:", newTask);
+                alert("Failed to create task");
+            }
+        } catch (error) {
+            console.error("Unexpected error:", error);
+            alert("An unexpected error occurred while creating the task.");
+        }
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            saveTask();
+            setNewRow(false);
+        }
+    };
 
     const handleTaskOptionClick = (e, taskId) => {
         e.preventDefault();
@@ -158,7 +194,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
     const deleteTask = (taskId) => {
         console.log("Deleting task with ID:", taskId);
-        const confirmed = window.confirm("Are you sure you want to delete this project?");
+        const confirmed = window.confirm("Are you sure you want to delete this project??????????");
         if (!confirmed) {
             console.log("Task deletion cancelled");
             return;
@@ -169,8 +205,11 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             })
                 .then(res => {
                     if (res.ok) {
-                        alert("Task deleted successfully");
-                        setTasklist(prev => prev.filter(t => t.t_id !== task.t_id));
+                        if (parentTaskId) {
+                            setSubTasks(prev => prev.filter(task => task.t_id !== taskId));
+                        } else {
+                            setParentSubTaskList(prev => prev.filter(task => task.t_id !== taskId));
+                        }
                     } else {
                         throw new Error("Failed to delete task");
                     }
@@ -265,9 +304,36 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
         setShowPriorityList(false);
     }
 
-    useEffect(() => {
-        console.log("priority changed: ", priority);
-    }, [priority]);
+    const fetchUsersInProject = async () => {
+        const res = await fetch(`/api/users_in_project?project_id=${task.p_id}`);
+        if (!res.ok) throw new Error("Failed to fetch users in project");
+        const users = await res.json();
+        console.log("Users in project:", users);
+        setUsersInProject(users);
+    }
+
+    const saveAssignment = async (user_id, user_name) => {
+        try {
+            console.log("user_id::: ", user_id);
+            console.log("task_id::: ", task.t_id);
+            const res = await fetch('/api/new_assignment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: user_id,
+                    task_id: task.t_id,
+                }),
+            });
+            if(res.ok){ 
+                const assign = await res.json();
+                setAssigns(prev => [...prev, user_name]) 
+            }
+            // setSubTasks(prev => [...prev, user_name]);
+        } catch (error) {
+            console.error("Error in new_assignment API call:", error);
+            alert("An unexpected error occurred while creating the assignment.");
+        }
+    }
 
     return (
         <>
@@ -325,7 +391,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                             </svg>
                         </div>
                         {/* add subtasks */}
-                        <div className='border rounded-md mr-1 border-gray-400 w-fit invisible group-hover:visible'>
+                        <div className='border rounded-md mr-1 border-gray-400 w-fit invisible group-hover:visible' onClick={() => { setNewRow(true); setViewSubTasks(true); }}>
                             <svg className="w-5 h-5 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
                             </svg>
@@ -365,12 +431,24 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 </td>
 
                 <td onClick={() => { setCurrentTask(task); }} className="pl-6">
-                    {/* {task.assigns?.join(', ')} */}
                     <div className="relative flex group/avatar -space-x-1 rtl:space-x-reverse w-[100px]">
-                        <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                        <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                        <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                        <div className="hidden group-hover/avatar:flex items-center justify-center w-7 h-7 text-xs font-medium text-white bg-gray-300 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={(e) => showProjectUserList(e, task.t_id)}>+</div>
+                        {assigns && assigns.length > 0 ? (
+                            <>
+                                {assigns.map((assign, index) => (
+                                    <div
+                                        key={index}
+                                        className="w-7 h-7 border-2 border-white rounded-full bg-blue-600 dark:border-gray-800 text-white flex items-center justify-center font-semibold uppercase" title={assign}
+                                    >
+                                        {assign.substring(0, 2) || "NA"}
+                                    </div>
+                                ))
+                                }
+                                <div className="hidden group-hover/avatar:flex items-center justify-center w-8 h-8 text-xs font-medium text-white bg-gray-300 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>+</div>
+                            </>
+                        ) : (
+                            <div className='text-xs hover:border hover:b-gray-400 p-2 rounded-xl' onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>No assigns</div>
+                        )}
+
                     </div>
                 </td>
 
@@ -438,14 +516,13 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 </td>
 
                 <td
-                    onClick={() => {setCurrentTask(task);}} className="px-6">
+                    onClick={() => { setCurrentTask(task); }} className="px-6">
                     <div className="relative flex items-center space-x-2">
-                        <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold uppercase" title={task.added_by?.u_name}>
+                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold uppercase" title={task.added_by?.u_name}>
                             {task.added_by?.u_name?.substring(0, 2) || "NA"}
                         </div>
                     </div>
                 </td>
-
 
                 <td className=" w-10">
                     <div className="w-fit px-2 border border-transparent hover:border-gray-400 rounded">
@@ -463,34 +540,79 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
             </tr >
 
-            {viewSubTasks &&
-                subtasks?.map((task, index) => (
-                    <React.Fragment key={task.t_id}>
-                        <Row task={task} subLevel={subLevel} />
+            {viewSubTasks && <>
+                {subtasks?.map((t, index) => (
+                    <React.Fragment>
+                        <Row task={t} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={subLevel} setTasklist={setTasklist} userId={userId} parentTaskId={task.t_id} setParentSubTaskList={setSubTasks} />
                     </React.Fragment>
-                ))
+                ))}
+                {newRow &&
+
+                    <tr
+                        onKeyPress={handleKeyPress}
+                        ref={newRowRef}
+                        className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer"
+                    >
+
+                        {/* Task Name */}
+                        <td colSpan={4} className=" px-14 w-full" style={{ marginLeft: `${marginLeft}px` }}>
+                            <div className='flex items-center w-full' style={{ marginLeft: `${marginLeft}px` }}>
+                                <div onClick={(e) => handleStatusIconClick(e)} className='px-2 py-2'> {getIcon(task.t_id, textColorMap[task.task_status_id])} </div>
+                                <input
+                                    type="text"
+                                    id="taskTitle"
+                                    placeholder='Task name'
+                                    className="text-gray-900 text-sm rounded-lg w-full px-2.5 py-1"
+                                    value={taskTitle}
+                                    onChange={(e) => setTaskTitle(e.target.value)}
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+                        </td>
+
+                        <td colSpan={4} className="px-2">
+                            <div className='flex items-center'>
+                                <button
+                                    type="button"
+                                    className="bg-white text-black border border-gray-200 px-2 py-1 mx-1 rounded-lg hover:bg-gray-200 z-0"
+                                    onClick={() => { setNewRow(false) }}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    className="bg-blue-400 text-black px-2 py-1 mx-1 rounded-lg hover:bg-blue-500 z-0"
+                                // onClick={handleNewTaskSubmit}
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+            </>
             }
 
             {/* Assignee Dropdown */}
             <OutsideClickWrapper onOutsideClick={() => setShowProjectUsers(false)}>
                 {showProjectUsers &&
                     <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${showProjectUsers ? 'block' : 'hidden'}`} style={{ top: `${showProjectUsers.y + 20}px`, left: `${showProjectUsers.x - 100}px`, position: 'fixed' }}>
-                        <ul className="py-1">
+                        {usersInProject?.map((u) => (
 
-                            <li className='flex items-center hover:bg-gray-100'>
-                                <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                                Uditha
-                            </li>
-                            <li className='flex items-center hover:bg-gray-100'>
-                                <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                                Uditha
-                            </li>
-                            <li className='flex items-center hover:bg-gray-100'>
-                                <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                                Uditha
-                            </li>
+                            <ul className="py-1 hover:bg-gray-100 cursor-pointer" onClick={() => { saveAssignment(u.u_id, u.u_name); setShowProjectUsers(false); }} key={u.u_id}>
 
-                        </ul>
+                                <li className='flex items-center'>
+                                    <div className="relative flex items-center space-x-2">
+                                        <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold uppercase" title={u.u_name}>
+                                            {u.u_name?.substring(0, 2) || "NA"}
+                                        </div>
+                                    </div>
+                                    <strong className='mx-3'>{u.u_name}</strong>
+                                </li>
+                            </ul>
+                        ))}
                     </div>
                 }
             </OutsideClickWrapper>
@@ -559,7 +681,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${showStatusList ? 'block' : 'hidden'}`} style={{ top: `${showStatusList.y + 20}px`, left: `${showStatusList.x - 15}px`, position: 'fixed' }}>
                         <ul className="py-1">
                             {Object.entries(statusName).map(([key, value], index) => (
-                                <li key={key} className="flex items-center hover:bg-gray-100 hover:cursor-pointer p-1" onClick={() => {setShowStatusList(false); task.task_status_id = key; updateTask();}}>
+                                <li key={key} className="flex items-center hover:bg-gray-100 hover:cursor-pointer p-1" onClick={() => { setShowStatusList(false); task.task_status_id = key; updateTask(); }}>
                                     <div className='mx-3'>{getIcon(key)}</div>
                                     <strong>{value}</strong>
                                 </li>

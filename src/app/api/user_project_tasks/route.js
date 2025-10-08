@@ -31,6 +31,7 @@ export async function GET(request) {
       where: {
         t_id: { in: taskIds },
         p_id: projectId,
+        parent_task_id: null // only top-level tasks
       },
       include: {
         user_tasks: {

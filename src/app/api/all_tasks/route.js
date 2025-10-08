@@ -13,12 +13,15 @@ export async function GET() {
         project: true,  // include the related project
         added_by: true // include user who added the task
       },
+      where: {
+        parent_task_id: null // only include top-level tasks
+      },
     });
 
     // Add "assigns" field with user names and "projectName" with project name
-    const tasksWithExtra = tasks?.map((task,index) => ({  
-      ...task,index,
-      assigns: task.user_tasks.map((ut,index) => ut.assigned_to.u_name),
+    const tasksWithExtra = tasks?.map((task, index) => ({
+      ...task, index,
+      assigns: task.user_tasks.map((ut, index) => ut.assigned_to.u_name),
       projectName: task.project?.p_name || null,
     }));
 

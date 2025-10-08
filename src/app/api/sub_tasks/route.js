@@ -3,17 +3,16 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const projectId = searchParams.get('p_id');
+  const parentTaskId = searchParams.get('parent_task_id');
 
-  if (!projectId) {
-    return NextResponse.json({ error: 'Missing projectId' }, { status: 400 });
+  if (!parentTaskId) {
+    return NextResponse.json({ error: 'Missing parent_task_id' }, { status: 400 });
   }
 
   try {
     const tasks = await prisma.task.findMany({
       where: {
-        p_id: projectId,
-        parent_task_id: null // only top-level tasks
+        parent_task_id: parentTaskId // only top-level tasks
       },
       include: {
         user_tasks: {

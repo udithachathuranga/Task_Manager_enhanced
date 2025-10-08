@@ -141,7 +141,7 @@ export default function Home() {
                   onClick={() => setShowDescription(false)}  // Optional: close on background click
                 />
                 {/* Sidebar */}
-                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} />
+                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} userId={u_id}/>
               </div>
             </OutsideClickWrapper>
           </div>

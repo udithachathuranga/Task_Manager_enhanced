@@ -10,8 +10,7 @@ export default function Test() {
     const fetchData = async () => {
       try {
         // 👇 change this URL to your API route
-        const res = await fetch("/api/all_tasks");
-
+        const res = await fetch(`/api/users_in_project?project_id=90743944-9e6e-40c7-8a7a-01974e1614da`);
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         const json = await res.json();
         setData(json);

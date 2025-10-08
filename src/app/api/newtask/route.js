@@ -4,9 +4,10 @@ export async function POST(req) {
     try {
         console.log('testing text');
         const body = await req.json()
-        const { t_title, t_description, due_date, date_created, time_estimate, priority, task_status_id, p_id, added_by_id, assigns } = body
+        const { t_title, t_description, due_date, date_created, time_estimate, priority, task_status_id, p_id, added_by_id, assigns, parent_task_id } = body
         console.log('task status id: ', task_status_id);
         console.log(p_id);
+        console.log("task before create: ", body);
         const NewTask = await prisma.task.create({
             data: {
                 t_title,
@@ -18,6 +19,7 @@ export async function POST(req) {
                 task_status_id,
                 p_id,
                 added_by_id,
+                parent_task_id
             },
         })
 
