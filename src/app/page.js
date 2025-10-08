@@ -22,7 +22,7 @@ export default function Home() {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [showDescription, setShowDescription] = useState(false);
   const [isEnableAddTask, setIsEnableAddTask] = useState(false);
-  const [currentProjectId, setCurrentprojectId] = useState("");
+  const [currentProjectId, setCurrentprojectId] = useState(null);
   const [viewSideBar, setViewSidebar] = useState(true);
 
   const router = useRouter();
@@ -71,12 +71,19 @@ export default function Home() {
 
   useEffect(() => {
     console.log("Task list updated: ", tasklist)
-    setCompletedTasks(tasklist.filter(task => task.task_status_id === "1"));
-    setOngoingTasks(tasklist.filter(task => task.task_status_id === "2"));
-    setOpenTasks(tasklist.filter(task => task.task_status_id === "3"));
-    console.log("completed tasks: ", completedTasks);
-    console.log("ongoing tasks: ", ongoingTasks);
-    console.log("open tasks: ", openTasks);
+    if (tasklist.length === 0) {
+      setCompletedTasks([]);
+      setOngoingTasks([]);
+      setOpenTasks([]);
+    } else {
+      setCompletedTasks(tasklist.filter(task => task.task_status_id === "1"));
+      setOngoingTasks(tasklist.filter(task => task.task_status_id === "2"));
+      setOpenTasks(tasklist.filter(task => task.task_status_id === "3"));
+      console.log("completed tasks: ", completedTasks);
+      console.log("ongoing tasks: ", ongoingTasks);
+      console.log("open tasks: ", openTasks);
+    }
+
   }, [tasklist]);
 
   const handleLogout = async () => {
@@ -141,7 +148,7 @@ export default function Home() {
                   onClick={() => setShowDescription(false)}  // Optional: close on background click
                 />
                 {/* Sidebar */}
-                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} userId={u_id}/>
+                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} userId={u_id} />
               </div>
             </OutsideClickWrapper>
           </div>

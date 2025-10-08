@@ -48,6 +48,7 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
     }, [role]); // depend on role so it runs after it's available
 
     const handleAllClick = async () => {
+        setCurrentProjectId(null);
         setTopic("All");
         if (role == "1") {
             //fetch all tasks
@@ -85,6 +86,7 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
     }
 
     const handleUserClick = async (u_id, u_name) => {
+        setCurrentProjectId(null);
         setIsEnableAddTask(false);
         setTopic(u_name);
         if (role == "1") {

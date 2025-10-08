@@ -324,7 +324,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
               </React.Fragment>
             ))}
 
-            {newRow &&
+            {newRow && currentProjectId &&
               <tr
                 onKeyPress={handleKeyPress}
                 ref={newRowRef}
@@ -369,7 +369,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
               </tr>
             }
 
-            {!newRow &&
+            {!newRow && currentProjectId &&
               <tr onClick={() => { setNewRow(true); }} className=" dark:bg-gray-800 cursor-pointer hover:bg-gray-300">
                 <th scope="row" className="flex px-6 py-2 font-medium text-gray-400 whitespace-nowrap dark:text-white">
                   <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">

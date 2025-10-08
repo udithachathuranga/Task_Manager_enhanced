@@ -38,24 +38,6 @@ export async function PUT(req) {
       },
     });
 
-    // 2. Delete previous assignments
-    await prisma.user_Task.deleteMany({
-      where: { related_to_id: t_id }
-    });
-
-    // 3. Create new assignments
-    if (assigns && Array.isArray(assigns)) {
-      for (const userId of assigns) {
-        await prisma.user_Task.create({
-          data: {
-            assigned: new Date(),
-            related_to_id: t_id,
-            assigned_to_id: userId
-          }
-        });
-      }
-    }
-
     console.log('Task Updated:', updatedTask);
     return new Response(JSON.stringify({ message: 'Task updated', task: updatedTask }), { status: 200 });
   } catch (err) {

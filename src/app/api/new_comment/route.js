@@ -21,6 +21,12 @@ export async function POST(req) {
             },
         })
 
+        const sender = await prisma.user.findUnique({
+            where: { u_id: sender_id },
+        });
+
+        comment.sender = sender;
+
         return NextResponse.json({ message: 'Comment created.',comment: comment }, { status: 201 })
     } catch (err) {
         // Unique constraint violation (needs a unique index on (assigned_to_id, related_to_id))

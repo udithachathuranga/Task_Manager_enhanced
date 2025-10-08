@@ -46,7 +46,7 @@ export async function GET(request) {
     // Step 3: Attach assigns field (array of user names) and projectName
     const tasksWithAssigns = tasks.map((task, index) => ({
       ...task, index,
-      assigns: task.user_tasks.map((ut, index) => ut.assigned_to.u_name),
+      assigns: task.user_tasks?.map((ut, index) => ut.assigned_to.u_name) || [],
       projectName: task.project?.p_name || null,
     }));
 

@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const taskId = searchParams.get('task_id');
+  const taskId = searchParams.get('taskId');
 
   if (!taskId) {
     return NextResponse.json(
@@ -18,7 +18,7 @@ export async function GET(request) {
         related_task_id: taskId,
       },
       include: {
-        assigned_to: true, // Fetch user details
+        sender: true, // Fetch sender details
       },
     });
 

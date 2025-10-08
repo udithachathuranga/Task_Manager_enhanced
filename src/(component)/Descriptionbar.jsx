@@ -13,6 +13,7 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
   const [taskDescription, setTaskDescription] = React.useState("");
   const [contextMenu, setContextMenu] = React.useState(null);
   const [editDescription, setEditDescription] = React.useState(false);
+  const [comments, setComments] = React.useState([]);
   const [message, setMessage] = React.useState("")
 
   const rowRef = useRef();
@@ -65,10 +66,19 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
     console.log("Task time sheets:", timeSheets);
   }
 
+  async function fetchComments() {
+    console.log("Fetching comments for task ID:", currentTask.t_id);
+    const res = await fetch(`/api/task_comments?taskId=${currentTask.t_id}`);
+    const comments = await res.json();
+    setComments(comments);
+    console.log("Task comments:", comments);
+  }
+
   useEffect(() => {
     console.log("current task: ", currentTask);
     console.log("current task: ", currentTask.projectName);
     fetchTimeSheets();
+    fetchComments();
     console.log("time sheets: ", timeSheets);
     if (role === "1" || role === "2") {
       setIsEnableAddTask(true);
@@ -183,6 +193,8 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
       if (res.ok) {
         // setTasklist(prev => [...prev, newTask]);
         setMessage("");
+        console.log("New comment added:", newComment);
+        setComments((prev) => [...prev, newComment.comment]);
       } else {
         console.error("Error creating comment:", newComment);
         alert("Failed to create comment");
@@ -299,8 +311,6 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
           </ul>
         </div>
 
-
-
         <div className="bg-white dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">
           <div className="flex items-center justify-center pt-4 border-t border-gray-300 dark:border-gray-600 text-lg font-semibold text-gray-800 dark:text-white tracking-wide">
             Track Times
@@ -380,45 +390,24 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
             </tbody>
           </table>
         </div>
-        <div className='border-t border-gray-100 py-2 bg-gray-100 px-4 rounded-lg mb-3'>
-          <div className='px-5 py-1 my-1 shadow-md rounded-lg bg-white'>
-            <div className='border-b border-gray-100'>
-              <div className='flex items-center'>
-                <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                <strong className='mx-3'>Buddika boralugoda</strong>
-                <div className='text-gray-400 text-sm'>Just now</div>
-              </div>
-              <div className='py-2'>This is a comment</div>
-            </div>
-            <div className='flex justify-between m-2'>
-              <div>
-                <svg class="w-5 h-5 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475" />
-                </svg>
-              </div>
-              <div className='text-sm text-gray-400'>Reply</div>
-            </div>
-          </div>
-          <div className='px-5 py-1 my-1 shadow-md rounded-lg bg-white'>
-            <div className='border-b border-gray-100'>
-              <div className='flex items-center'>
-                <Image className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-                <strong className='mx-3'>Buddika boralugoda</strong>
-                <div className='text-gray-400 text-sm'>Just now</div>
-              </div>
-              <div className='py-2'>This is a comment</div>
-            </div>
-            <div className='flex justify-between m-2'>
-              <div>
-                <svg class="w-5 h-5 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11c.889-.086 1.416-.543 2.156-1.057a22.323 22.323 0 0 0 3.958-5.084 1.6 1.6 0 0 1 .582-.628 1.549 1.549 0 0 1 1.466-.087c.205.095.388.233.537.406a1.64 1.64 0 0 1 .384 1.279l-1.388 4.114M7 11H4v6.5A1.5 1.5 0 0 0 5.5 19v0A1.5 1.5 0 0 0 7 17.5V11Zm6.5-1h4.915c.286 0 .372.014.626.15.254.135.472.332.637.572a1.874 1.874 0 0 1 .215 1.673l-2.098 6.4C17.538 19.52 17.368 20 16.12 20c-2.303 0-4.79-.943-6.67-1.475" />
-                </svg>
-              </div>
-              <div className='text-sm text-gray-400'>Reply</div>
-            </div>
-          </div>
-        </div>
 
+        <div className='border-t border-gray-100 py-2 bg-gray-100 px-4 rounded-lg mb-3'>
+          {comments.length} Comments
+          {comments.map((comment) => (
+            <div className='flex items-start px-5 py-1 my-1 shadow-md rounded-lg bg-white'>
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center mx-3 mt-1 font-semibold uppercase" title={comment.sender.u_name}>
+                {comment.sender.u_name.substring(0, 2) || "NA"}
+              </div>
+              <div className='border-b border-gray-100'>
+                <div className='flex items-center'>
+                  <strong>{comment.sender.u_name}</strong>
+                  <div className='text-gray-400 text-sm mx-3'>{comment.date}</div>
+                </div>
+                <div>{comment.message}</div>
+              </div>
+            </div>
+          ))}
+        </div>
 
         <div>
           <label for="chat" className="sr-only">Your comment</label>
@@ -434,6 +423,7 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
         </div>
 
       </div>
+
       <div className='relative'>
         {contextMenu && (
           <button

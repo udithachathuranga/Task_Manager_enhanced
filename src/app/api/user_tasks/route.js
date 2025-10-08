@@ -20,7 +20,11 @@ export async function GET(request) {
       },
     });
 
-    const taskIds = userTaskLinks.map(link => link.related_to_id);
+    if (!userTaskLinks.length) {
+      return NextResponse.json([]) // nothing assigned to this user
+    }
+
+    const taskIds = Array.from(new Set(userTaskLinks.map(l => l.related_to_id)))
 
     // Step 2: Fetch Task objects, their assigned users, and related project
     const tasks = await prisma.task.findMany({
@@ -35,13 +39,18 @@ export async function GET(request) {
           },
         },
         project: true, // include related project
+        added_by: true // include user who added the task
       },
     });
+
+    if (!tasks.length) {
+      return NextResponse.json([])
+    }
 
     // Step 3: Add `assigns` field with user names and projectName
     const tasksWithAssigns = tasks.map((task, index) => ({
       ...task, index,
-      assigns: task.user_Tasks.map((ut, index) => ut.assigned_to.u_name),
+      assigns: task.user_Tasks?.map((ut, index) => ut.assigned_to.u_name) || [],
       projectName: task.project?.p_name || null,
     }));
 
