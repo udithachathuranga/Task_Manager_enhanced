@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react'
-import Image from 'next/image';
 import OutsideClickWrapper from '../(component)/OutsideClickWrapper';
 
 function Row({ task, showDescription, setShowDescription, setCurrentTask, subLevel, setTasklist, userId, parentTaskId, setParentSubTaskList }) {
@@ -19,6 +18,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const [editTimeEstimate, setEditTimeEstimate] = useState(false);
     const [editTimeSpent, setEditTimeSpent] = useState(false);
     const [newRow, setNewRow] = useState(false);
+    const [newTaskTitle, setNewTaskTitle] = useState("");
 
     const [viewSubTasks, setViewSubTasks] = useState(false);
     const [showProjectUsers, setShowProjectUsers] = useState(false);
@@ -29,13 +29,14 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const [subtasks, setSubTasks] = useState([]);
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchSubTasks = async () => {
             const res = await fetch(`/api/sub_tasks?parent_task_id=${task.t_id}`);
             const data = await res.json();
             console.log("Sub tasks:", data);
             setSubTasks(data);
+            task.numberOfSubTasks = data.length;
         };
-        fetchData();
+        fetchSubTasks();
         setAssigns(task.assigns);
     }, []);
 
@@ -108,7 +109,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    t_title: taskTitle,
+                    t_title: newTaskTitle,
                     t_description: "",
                     due_date: null,
                     date_created: new Date(),
@@ -123,7 +124,9 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
             const newTask = await res.json(); // await is required here
             if (res.ok) {
+                newTask.task.project = task.project;
                 console.log("New task created:", newTask);
+                task.numberOfSubTasks += 1;
                 setSubTasks(prev => [...prev, newTask.task]);
                 // setNewRow(false);
             } else {
@@ -139,7 +142,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             saveTask();
-            setNewRow(false);
+            setTaskTitle('');
+            // setNewRow(false);
         }
     };
 
@@ -194,7 +198,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
     const deleteTask = (taskId) => {
         console.log("Deleting task with ID:", taskId);
-        const confirmed = window.confirm("Are you sure you want to delete this project??????????");
+        const confirmed = window.confirm("Are you sure you want to delete this task?");
         if (!confirmed) {
             console.log("Task deletion cancelled");
             return;
@@ -206,9 +210,9 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 .then(res => {
                     if (res.ok) {
                         if (parentTaskId) {
-                            setSubTasks(prev => prev.filter(task => task.t_id !== taskId));
-                        } else {
                             setParentSubTaskList(prev => prev.filter(task => task.t_id !== taskId));
+                        } else {
+                            setTasklist(prev => prev.filter(task => task.t_id !== taskId));
                         }
                     } else {
                         throw new Error("Failed to delete task");
@@ -324,9 +328,9 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     task_id: task.t_id,
                 }),
             });
-            if(res.ok){ 
+            if (res.ok) {
                 const assign = await res.json();
-                setAssigns(prev => [...prev, user_name]) 
+                setAssigns(prev => [...prev, user_name])
             }
             // setSubTasks(prev => [...prev, user_name]);
         } catch (error) {
@@ -343,24 +347,24 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             >
                 <th
                     scope="row"
-                    className="flex items-center py-2 font-medium text-gray-700 whitespace-nowrap dark:text-white"
+                    className="flex items-center font-medium text-gray-700 whitespace-nowrap dark:text-white"
                     style={{ marginLeft: `${marginLeft}px` }}
                 >
-                    {subtasks ? (
+                    {subtasks.length > 0 ? (
                         viewSubTasks ? (
-                            <svg onClick={() => setViewSubTasks(false)} className="w-4 h-4 text-gray-400 ml-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="12" fill="currentColor" viewBox="0 0 24 24" >
+                            <svg onClick={() => setViewSubTasks(false)} className="w-4 h-4 text-gray-400 mt-2 ml-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="12" fill="currentColor" viewBox="0 0 24 24" >
                                 <path fillRule="evenodd" d="M18.425 10.271C19.499 8.967 18.57 7 16.88 7H7.12c-1.69 0-2.618 1.967-1.544 3.271l4.881 5.927a2 2 0 0 0 3.088 0l4.88-5.927Z" clipRule="evenodd" />
                             </svg>
                         ) : (
-                            <svg onClick={() => setViewSubTasks(true)} className="w-4 h-4 text-gray-400 ml-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="12" fill="currentColor" viewBox="0 0 24 24" >
+                            <svg onClick={() => setViewSubTasks(true)} className="w-4 h-4 mt-2 ml-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="12" fill="currentColor" viewBox="0 0 24 24" >
                                 <path fillRule="evenodd" d="M10.271 5.575C8.967 4.501 7 5.43 7 7.12v9.762c0 1.69 1.967 2.618 3.271 1.544l5.927-4.881a2 2 0 0 0 0-3.088l-5.927-4.88Z" clipRule="evenodd" />
                             </svg>
                         )
                     ) : (
-                        <div className="w-3" />
+                        <div className="w-8" />
                     )}
 
-                    <div className="mx-4" onClick={(e) => handleStatusIconClick(e, task.t_id)}>
+                    <div className="mx-4 mt-2" onClick={(e) => handleStatusIconClick(e, task.t_id)}>
                         {getIcon(task.task_status_id)}
                     </div>
 
@@ -370,14 +374,15 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                 type="text"
                                 id="taskTitle"
                                 placeholder='Task name'
-                                className="text-gray-900 font-bold text-sm rounded-sm w-40"
+                                className="text-gray-900 font-bold text-sm rounded-sm w-40 p-1"
                                 value={taskTitle}
                                 onChange={(e) => setTaskTitle(e.target.value)}
+                                autoFocus
                                 required
                             />
                         </OutsideClickWrapper>
                     ) : (
-                        <strong onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className='transition-transform hover:scale-[1.05]'>{task.t_title}</strong>
+                        <strong onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className='transition-transform mt-1 hover:scale-[1.05]'>{task.t_title}</strong>
                     )}
 
                 </th>
@@ -401,7 +406,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 </th>
 
                 <td className="px-5">
-                    <div onClick={() => { setCurrentTask(task); }} className="w-full py-1 border border-transparent hover:border-gray-400 rounded">
+                    <div onClick={() => { setCurrentTask(task); }} className="w-full py-1">
                         {task.project?.p_name ?? "kkkk"}
                     </div>
                 </td>
@@ -416,7 +421,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-fit px-2.5 py-1"
                                 // placeholder="YYYY-MM-DD"
                                 value={dueDate}
-                                onChange={(e) => setDueDate(e.target.value)}
+                                onChange={(e) => { setDueDate(e.target.value) }}
+                                autoFocus
                             //required
                             />
                         </OutsideClickWrapper>
@@ -443,17 +449,16 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                     </div>
                                 ))
                                 }
-                                <div className="hidden group-hover/avatar:flex items-center justify-center w-8 h-8 text-xs font-medium text-white bg-gray-300 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>+</div>
+                                <div className="hidden group-hover/avatar:flex items-center justify-center w-7 h-7 text-xs font-medium text-white bg-gray-300 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }} title='Add Assi'>+</div>
                             </>
                         ) : (
-                            <div className='text-xs hover:border hover:b-gray-400 p-2 rounded-xl' onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>No assigns</div>
+                            <div className='text-xs hover:border hover:b-gray-400 p-1 rounded-xl' onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>No assigns</div>
                         )}
-
                     </div>
                 </td>
 
                 <td onClick={() => { setCurrentTask(task); }} className="px-6">
-                    <div className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
+                    <div className="w-fit px-2 py-1">
                         {new Date(task.date_created).toLocaleDateString()}
                         {/* {task.date_created} */}
                     </div>
@@ -478,6 +483,15 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z" />
                                 </svg>
                                 {task.time_estimate}
+                                {" "}
+                                {task.time_estimate ? (
+                                    task.time_estimate < 10 ? (
+                                        <span className="text-xs">h</span>
+                                    ) : (
+                                        <span className='text-xs'>min</span>
+                                    )
+                                ) : null}
+
                             </div>
                         </div>
                     )}
@@ -502,6 +516,14 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z" />
                                 </svg>
                                 {task.time_spent}
+                                {" "}
+                                {task.time_spent ? (
+                                    task.time_spent < 10 ? (
+                                        <span className="text-xs">h</span>
+                                    ) : (
+                                        <span className='text-xs'>min</span>
+                                    )
+                                ) : null}
                             </div>
                         </div>
                     )}
@@ -525,17 +547,17 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 </td>
 
                 <td className=" w-10">
-                    <div className="w-fit px-2 border border-transparent hover:border-gray-400 rounded">
-                        <button
-                            type="button"
-                            className="text-black mx-1 rounded-lg z-0"
-                            onClick={(e) => handleTaskOptionClick(e, task.t_id)}
-                        >
-                            <svg className="w-5 h-5 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01" />
-                            </svg>
-                        </button>
-                    </div>
+                    {/* <div className="w-fit px-2 border border-transparent hover:border-gray-400 rounded"> */}
+                    <button
+                        type="button"
+                        className="text-black mx-1 rounded-lg z-0 w-fit p-1 border border-transparent hover:border-gray-400"
+                        onClick={(e) => handleTaskOptionClick(e, task.t_id)}
+                    >
+                        <svg className="w-5 h-5 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01" />
+                        </svg>
+                    </button>
+                    {/* </div> */}
                 </td>
 
             </tr >
@@ -563,8 +585,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                     id="taskTitle"
                                     placeholder='Task name'
                                     className="text-gray-900 text-sm rounded-lg w-full px-2.5 py-1"
-                                    value={taskTitle}
-                                    onChange={(e) => setTaskTitle(e.target.value)}
+                                    value={newTaskTitle}
+                                    onChange={(e) => setNewTaskTitle(e.target.value)}
                                     required
                                     autoFocus
                                 />
@@ -623,12 +645,12 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${isTaskOptionOpen ? 'block' : 'hidden'}`} style={{ top: `${isTaskOptionOpen.y + 40}px`, left: `${isTaskOptionOpen.x - 100}px`, position: 'fixed' }}>
                         <ul className="py-1">
 
-                            <li className="flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer" onClick={() => { console.log("Edit Task"); setIsTaskOptionOpen(false); allowEditTask(isTaskOptionOpen.taskId) }}>
+                            {/* <li className="flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer" onClick={() => { console.log("Edit Task"); setIsTaskOptionOpen(false); allowEditTask(isTaskOptionOpen.taskId) }}>
                                 <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
                                 </svg>
                                 Edit Task
-                            </li>
+                            </li> */}
                             <li className="flex items-center px-3 py-1 hover:bg-red-500 hover:text-white cursor-pointer" onClick={() => { console.log("Delete Task"); setIsTaskOptionOpen(false); deleteTask(isTaskOptionOpen.taskId) }}>
                                 <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />

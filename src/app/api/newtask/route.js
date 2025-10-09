@@ -35,6 +35,11 @@ export async function POST(req) {
                 console.log('New User_Task Created:', NewUser_task);
             }
         }
+        
+        const project = await prisma.project.findUnique({
+            where: { p_id: p_id },
+        });
+        NewTask.project = project;
 
         console.log('New Task Created:', NewTask);
 

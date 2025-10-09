@@ -3,18 +3,19 @@ import OutsideClickWrapper from './OutsideClickWrapper';
 import Image from 'next/image';
 import { comment } from 'postcss';
 
-function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
+function Descriptionbar({ currentTask, role, setShowDescription, userId, setTasklist }) {
 
   const [timeSheets, setTimeSheets] = React.useState([]);
   const [newRow, setNewRow] = React.useState(false);
   const [isEnableAddTask, setIsEnableAddTask] = React.useState(false);
   const [date, setDate] = React.useState("");
   const [duration, setDuration] = React.useState("");
-  const [taskDescription, setTaskDescription] = React.useState("");
+  const [taskDescription, setTaskDescription] = React.useState(currentTask.t_description ? currentTask.t_description : "");
   const [contextMenu, setContextMenu] = React.useState(null);
   const [editDescription, setEditDescription] = React.useState(false);
   const [comments, setComments] = React.useState([]);
-  const [message, setMessage] = React.useState("")
+  const [message, setMessage] = React.useState("");
+  const [activities, setActivities] = React.useState([]);
 
   const rowRef = useRef();
 
@@ -74,11 +75,19 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
     console.log("Task comments:", comments);
   }
 
+  async function fetchActivities() {
+    console.log("Fetching activities for task ID:", currentTask.t_id);
+    const res = await fetch(`/api/task_activities?taskId=${currentTask.t_id}`);
+    const activities = await res.json();
+    setActivities(activities);
+    console.log("Task activities:", activities);
+  }
+
   useEffect(() => {
     console.log("current task: ", currentTask);
-    console.log("current task: ", currentTask.projectName);
     fetchTimeSheets();
     fetchComments();
+    fetchActivities();
     console.log("time sheets: ", timeSheets);
     if (role === "1" || role === "2") {
       setIsEnableAddTask(true);
@@ -149,24 +158,22 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
     }
   };
 
-  const updateDescription = () => {
-
-  }
-
-  const saveTask = async () => {
+  const updateDescription = async () => {
     try {
-      const res = await fetch('/api/newtask', {
-        method: 'POST',
+      const res = await fetch('/api/update_task', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          t_title: taskTitle,
+          t_id: currentTask.t_id,
           t_description: taskDescription,
         }),
       });
+
       const newTask = await res.json(); // await is required here
       if (res.ok) {
         setTasklist(prev => [...prev, newTask]);
-        // setNewRow(false);
+        currentTask.t_description = taskDescription;
+        setEditDescription(false);
       } else {
         console.error("Error creating task:", newTask);
         alert("Failed to create task");
@@ -191,7 +198,6 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
       });
       const newComment = await res.json();
       if (res.ok) {
-        // setTasklist(prev => [...prev, newTask]);
         setMessage("");
         console.log("New comment added:", newComment);
         setComments((prev) => [...prev, newComment.comment]);
@@ -205,16 +211,29 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
     }
   };
 
+  const formatColomboDateTime = (iso) =>
+    new Date(iso).toLocaleString("en-GB", {
+      timeZone: "Asia/Colombo",
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
   return (
     <aside id="separator-sidebar" className="fixed rounded-lg top-0 right-0 z-40 w-1/2 h-screen transition-transform -translate-x-full sm:translate-x-0 border-l border-black dark:border-white" aria-label="Sidebar">
 
-      <svg onClick={() => { setShowDescription(false) }} className="absolute w-6 h-6 right-0 top-0 m-10 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
-      </svg>
+      <div className='absolute right-0 top-0 mx-16 my-10 p-2 hover:bg-gray-100 rounded-md' onClick={() => { setShowDescription(false) }}>
+        <svg className="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
+        </svg>
+      </div>
 
-      <div className="h-full px-5 py-4 overflow-y-auto bg-white dark:bg-gray-800">
+      <div className="h-full px-10 py-4 overflow-y-auto bg-white dark:bg-gray-800">
 
-        <h1 className="text-3xl font-bold text-black pt-4 pb-8 rounded-md text-left">
+        <h1 className="text-4xl font-bold text-black pt-4 pb-8 rounded-md text-left">
           {currentTask.t_title}
         </h1>
 
@@ -223,29 +242,47 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
             <div className='px-3 py-2'> {getIcon(status, "text-white")} </div>
             <h1 className="text-1xl mr-4 text-white">{status}</h1>
           </div>
-          <div className='flex items-center mx-10 text-gray-600'>
-            <strong>Due : </strong>
-            <p className='mx-5'>{new Date(currentTask.due_date).toLocaleDateString()}</p>
-          </div>
+
+          {currentTask.due_date ? (
+            <div className='flex items-center mx-10 text-gray-600'>
+              <strong>Due : </strong>
+              <p className='mx-5'>{new Date(currentTask.due_date).toLocaleDateString()}</p>
+            </div>
+          ) : (
+            <div className='mx-10 text-xs hover:border hover:b-gray-400 p-2 rounded-xl text-red-500'>No Due Dates for this task.</div>
+          )}
+
           <div className="relative flex group/avatar -space-x-1 rtl:space-x-reverse mx-10">
-            <Image className="w-12 h-12 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-            <Image className="w-12 h-12 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
-            <Image className="w-12 h-12 border-2 border-white rounded-full dark:border-gray-800" src="/images/uditha.jpg" width={40} height={40} alt="uditha" />
+            {currentTask.assigns && currentTask.assigns.length > 0 ? (
+              <>
+                {currentTask.assigns.map((assign, index) => (
+                  <div
+                    key={index}
+                    className="w-12 h-12 border-2 border-white rounded-full bg-blue-600 dark:border-gray-800 text-white flex items-center justify-center font-semibold uppercase" title={assign}
+                  >
+                    {assign.substring(0, 2) || "NA"}
+                  </div>
+                ))}
+              </>
+            ) : (
+              <div className='text-xs hover:border hover:b-gray-400 p-2 rounded-xl text-red-500'>No assignees for this task.</div>
+            )}
           </div>
         </div>
 
         <div className='relative bg-gray-100 rounded-lg w-full h-20 px-2 py-auto my-5'>
           <div className="flex items-center h-full px-4 w-[calc(100%-20px)]">
             {editDescription ? (
-              <OutsideClickWrapper onOutsideClick={() => setEditDescription(false)}>
+              <OutsideClickWrapper onOutsideClick={() => { setEditDescription(false); setTaskDescription(""); }}>
                 <div className='flex items-center'>
                   <input
                     type="text"
                     id="taskTitle"
                     placeholder='Add Description'
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-[500px] p-2.5"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-[500px] p-2.5 "
                     value={taskDescription}
                     onChange={(e) => setTaskDescription(e.target.value)}
+                    autoFocus
                   />
                   <button
                     className='px-3 py-1 bg-blue-400 hover:bg-blue-500 rounded-lg m-5'
@@ -295,20 +332,31 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId }) {
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.8 13.938h-.011a7 7 0 1 0-11.464.144h-.016l.14.171c.1.127.2.251.3.371L12 21l5.13-6.248c.194-.209.374-.429.54-.659l.13-.155Z" />
               </svg>
-              <strong>2 Sub Tasks.</strong>
+              <strong>{currentTask.numberOfSubTasks} Sub Tasks.</strong>
             </td>
           </tr>
         </table>
 
         <div className='py-4 border-t border-gray-300'>
-          <h1 className="text-2xl font-bold text-black rounded-md text-left mb-3">
-            Activity
+          <h1 className="text-2xl font-bold text-gray-600 rounded-md text-left ml-4 mb-3">
+            Activities
           </h1>
-          <ul>
-            <li className='my-1 ml-4 text-gray-600'>You created this task - May 10 at 11.31</li>
-            <li className='my-1 ml-4 text-gray-600'>You set the due date at 11.31</li>
-            <li className='my-1 ml-4 text-gray-600'>You assigned to Salini Herath May 10 at 11.31</li>
-          </ul>
+
+          {activities.length > 0 ? (
+            <ul>
+              {activities.map((activity, index) => (
+                <li className='flex items-center my-1 ml-10 text-gray-600'>
+                  <strong>•</strong>
+                  <div className='mx-5'>{activity.done_by.u_name} {activity.content}</div>
+                  <div className='text-xs'>at {formatColomboDateTime(activity?.date)}</div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className='mx-10 text-xs hover:border hover:b-gray-400 p-2 rounded-xl text-red-500'>No Activities for this task yet.</div>
+          )}
+
+
         </div>
 
         <div className="bg-white dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white">

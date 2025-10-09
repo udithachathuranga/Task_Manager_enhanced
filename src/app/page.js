@@ -113,8 +113,8 @@ export default function Home() {
 
           <div className="relative bg-white dark:bg-gray-700 rounded-lg text-gray-900  dark:text-white mb-3">
             <div className="flex py-2 bg-gray-200 dark:bg-gray-800 border-b border-gray-300">
-              <div className="bg-gray-500 mx-5 px-10 py-3 rounded-full w-96">
-                <h1 className="text-3xl font-bold text-gray-200 text-center">{topic}</h1>
+              <div className="bg-black mx-5 px-10 py-3 rounded-full w-96 border-white border-4 dark:border-white">
+                <h1 className="text-3xl font-bold text-white text-center">{topic}</h1>
               </div>
               <button
                 onClick={handleLogout}
@@ -125,7 +125,6 @@ export default function Home() {
                   <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 8h11m0 0L8 4m4 4-4 4m4-11h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
                 </svg>
               </button>
-
             </div>
           </div>
           <div className="m-5">
@@ -148,7 +147,7 @@ export default function Home() {
                   onClick={() => setShowDescription(false)}  // Optional: close on background click
                 />
                 {/* Sidebar */}
-                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} userId={u_id} />
+                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} userId={u_id} setTasklist={setTasklist}/>
               </div>
             </OutsideClickWrapper>
           </div>

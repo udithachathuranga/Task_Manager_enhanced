@@ -119,6 +119,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
     function handleClickNewRowOutside(event) {
       if (newRowRef.current && !newRowRef.current.contains(event.target)) {
         setNewRow(false);
+        setTaskTitle("");
       }
     }
     if (newRow !== null) {
@@ -150,6 +151,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
 
       const newTask = await res.json(); // await is required here
       if (res.ok) {
+        console.log("submited task: ", newTask);
         setTasklist(prev => [...prev, newTask.task]);
         // setNewRow(false);
       } else {
@@ -165,7 +167,8 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       saveTask();
-      setNewRow(false);
+      setTaskTitle("");
+      // setNewRow(false);
     }
   };
 
