@@ -7,6 +7,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
     const [taskTitle, setTaskTitle] = useState(task.t_title);
     const [dueDate, setDueDate] = useState(task.due_date);
+    const [startDate, setStartDate] = useState(task.start_date)
     const [dateCreated, setDateCreated] = useState(task.date_created);
     const [timeEstimate, setTimeEstimate] = useState(task.time_estimate);
     const [priority, setPriority] = useState(task.priority);
@@ -17,6 +18,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const [editDueDate, setEditDueDate] = useState(false);
     const [editTimeEstimate, setEditTimeEstimate] = useState(false);
     const [editTimeSpent, setEditTimeSpent] = useState(false);
+    const [editStartDate, setEditStartDate] = useState(false);
     const [newRow, setNewRow] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState("");
 
@@ -101,6 +103,56 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const textClass = textColorMap[name] || 'text-gray-400';
     const marginLeft = 4 + 50 * subLevel;
     subLevel++;
+
+    const TZ = "Asia/Colombo";
+    const MS_DAY = 24 * 60 * 60 * 1000;
+
+    function zonedMidnightUTC(d) {
+        const parts = new Intl.DateTimeFormat("en-US", {
+            timeZone: TZ, year: "numeric", month: "numeric", day: "numeric",
+        }).formatToParts(d);
+        const get = t => Number(parts.find(p => p.type === t).value);
+        const utc = Date.UTC(get("year"), get("month") - 1, get("day"));
+        const dayIndex = new Date(utc).getUTCDay(); // 0..6
+        return { utc, dayIndex };
+    }
+
+    function formatSmartDate(iso) {
+        const taskDate = new Date(iso);
+        if (isNaN(taskDate)) return ""; // guard invalid dates
+
+        const task = zonedMidnightUTC(taskDate);
+        const today = zonedMidnightUTC(new Date());
+        const diffDays = Math.round((task.utc - today.utc) / MS_DAY);
+
+        if (diffDays === 0) return "Today";
+        if (diffDays === -1) return "Yesterday";
+        if (diffDays === 1) return "Tomorrow";
+
+        // This week? (Mon–Sun in Colombo)
+        const mondayOffset = ((today.dayIndex + 6) % 7);
+        const weekStart = today.utc - mondayOffset * MS_DAY;
+        const weekEnd = weekStart + 6 * MS_DAY;
+
+        if (task.utc >= weekStart && task.utc <= weekEnd) {
+            // 3-letter weekday, e.g., "Wed"
+            return new Intl.DateTimeFormat("en-US", {
+                timeZone: TZ, weekday: "short",
+            }).format(taskDate);
+        }
+
+        // Fallback: DD/MM/YYYY (e.g., "03/10/2025")
+        return new Intl.DateTimeFormat("en-GB", {
+            timeZone: TZ, day: "2-digit", month: "2-digit", year: "numeric",
+        }).format(taskDate);
+    }
+
+    const isOverdue = (iso) => {
+        if (!iso) return false;
+        const due = zonedMidnightUTC(new Date(iso)).utc;   // local (Colombo) midnight of due date
+        const today = zonedMidnightUTC(new Date()).utc;    // local (Colombo) midnight of today
+        return due < today;                                // strictly before today
+    };
 
     const saveTask = async () => {
         try {
@@ -236,14 +288,11 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 body: JSON.stringify({
                     t_id: task.t_id,
                     t_title: taskTitle,
+                    start_date: new Date(startDate).toISOString(),
                     due_date: new Date(dueDate).toISOString(),
-                    date_created: dateCreated,
                     time_estimate: parseInt(timeEstimate, 10),
                     priority: task.priority,//parseInt(priority, 10),
-                    time_spent: parseInt(timeSpent, 10),
                     task_status_id: task.task_status_id,
-                    p_id: task.p_id,
-                    added_by_id: task.added_by_id,
                     assigns: assigns
                 }),
             });
@@ -345,6 +394,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 key={task.t_id}
                 className="group bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-50 z-0 text-size-2xl"
             >
+                {/* task title */}
                 <th
                     scope="row"
                     className="flex items-center font-medium text-gray-700 whitespace-nowrap dark:text-white"
@@ -387,6 +437,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
                 </th>
 
+                {/* buttons */}
                 <th>
                     <div className='flex items-center'>
                         {/* edit task */}
@@ -405,37 +456,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
                 </th>
 
-                <td className="px-5">
-                    <div onClick={() => { setCurrentTask(task); }} className="w-full py-1">
-                        {task.project?.p_name ?? "kkkk"}
-                    </div>
-                </td>
-
-                <td className="px-6">
-
-                    {editDueDate ? (
-                        <OutsideClickWrapper onOutsideClick={() => { setEditDueDate(false); updateTask(); }}>
-                            <input
-                                type="date"
-                                id="due_date"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-fit px-2.5 py-1"
-                                // placeholder="YYYY-MM-DD"
-                                value={dueDate}
-                                onChange={(e) => { setDueDate(e.target.value) }}
-                                autoFocus
-                            //required
-                            />
-                        </OutsideClickWrapper>
-                    ) : (
-                        <div onClick={() => setEditDueDate(true)} className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
-                            {/* {new Date(task.due_date).toLocaleDateString()} */}
-                            {task.due_date ? new Date(task.due_date).toLocaleDateString() : "due"}
-                        </div>
-                    )}
-
-
-                </td>
-
+                {/* asignees */}
                 <td onClick={() => { setCurrentTask(task); }} className="pl-6">
                     <div className="relative flex group/avatar -space-x-1 rtl:space-x-reverse w-[100px]">
                         {assigns && assigns.length > 0 ? (
@@ -457,23 +478,78 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     </div>
                 </td>
 
-                <td onClick={() => { setCurrentTask(task); }} className="px-6">
-                    <div className="w-fit px-2 py-1">
-                        {new Date(task.date_created).toLocaleDateString()}
-                        {/* {task.date_created} */}
+                {/* priority */}
+                <td onClick={() => { setCurrentTask(task); }} >
+                    <div onClick={(e) => handlePriorityClick(e, task.t_id)} className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
+                        <div className="flex items-center px-6">
+                            {priorityFlag(task.priority)}
+                        </div>
                     </div>
                 </td>
 
+                {/* due date */}
+                <td className="px-6">
+                    {editDueDate ? (
+                        <OutsideClickWrapper onOutsideClick={() => { setEditDueDate(false); updateTask(); }}>
+                            <input
+                                type="date"
+                                id="due_date"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-fit px-2.5 py-1"
+                                // placeholder="YYYY-MM-DD"
+                                value={dueDate}
+                                onChange={(e) => { setDueDate(e.target.value) }}
+                                autoFocus
+                            //required
+                            />
+                        </OutsideClickWrapper>
+                    ) : (
+                        <div
+                            onClick={() => setEditDueDate(true)}
+                            className={`w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded ${task.due_date && isOverdue(task.due_date) && task.task_status_id != 3 ? "text-red-600" : "text-gray-700"
+                                }`}
+                        >
+                            {task.due_date ? formatSmartDate(task.due_date) : "due"}
+                        </div>
+                    )}
+                </td>
+
+                {/* start date */}
+                <td className="px-6">
+                    {editStartDate ? (
+                        <OutsideClickWrapper onOutsideClick={() => { setEditStartDate(false); updateTask(); }}>
+                            <input
+                                type="date"
+                                id="start_date"
+                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-fit px-2.5 py-1"
+                                // placeholder="YYYY-MM-DD"
+                                value={startDate}
+                                onChange={(e) => { setStartDate(e.target.value) }}
+                                autoFocus
+                            //required
+                            />
+                        </OutsideClickWrapper>
+                    ) : (
+                        <div
+                            onClick={() => setEditStartDate(true)}
+                            className={`w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded`}
+                        >
+                            {task.start_date ? formatSmartDate(task.start_date) : "due"}
+                        </div>
+                    )}
+                </td>
+
+                {/* time estimate */}
                 <td onClick={() => { setEditTimeEstimate(true) }} >
                     {editTimeEstimate ? (
                         <OutsideClickWrapper onOutsideClick={() => { setEditTimeEstimate(false); updateTask(); }}>
                             <input
                                 type="number"
                                 id="timeEstimate"
-                                placeholder='Time Estimate'
-                                className="text-gray-900 text-sm rounded-sm w-40 p-1.5"
+                                // placeholder='Time Estimate'
+                                className="text-gray-900 text-sm rounded-sm w-10 p-1 ml-3"
                                 value={timeEstimate}
                                 onChange={(e) => setTimeEstimate(e.target.value)}
+                                autoFocus
                             />
                         </OutsideClickWrapper>
                     ) : (
@@ -497,16 +573,18 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     )}
                 </td>
 
+                {/* time spent */}
                 <td onClick={() => { setEditTimeSpent(true) }} >
                     {editTimeSpent ? (
                         <OutsideClickWrapper onOutsideClick={() => { setEditTimeSpent(false); updateTask(); }}>
                             <input
                                 type="number"
                                 id="timeSpent"
-                                placeholder='Time Spent'
-                                className="text-gray-900 font-bold text-sm rounded-sm w-40"
+                                // placeholder='Time Spent'
+                                className="text-gray-900 text-sm rounded-sm w-10 p-1 ml-3"
                                 value={timeSpent}
                                 onChange={(e) => setTimeSpent(e.target.value)}
+                                autoFocus
                             />
                         </OutsideClickWrapper>
                     ) : (
@@ -529,14 +607,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     )}
                 </td>
 
-                <td onClick={() => { setCurrentTask(task); }} >
-                    <div onClick={(e) => handlePriorityClick(e, task.t_id)} className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
-                        <div className="flex items-center px-6">
-                            {priorityFlag(task.priority)}
-                        </div>
-                    </div>
-                </td>
-
+                {/* added by */}
                 <td
                     onClick={() => { setCurrentTask(task); }} className="px-6">
                     <div className="relative flex items-center space-x-2">
@@ -546,6 +617,21 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     </div>
                 </td>
 
+                {/* project */}
+                {/* <td className="px-5">
+                    <div onClick={() => { setCurrentTask(task); }} className="w-full py-1">
+                        {task.project?.p_name ?? "kkkk"}
+                    </div>
+                </td> */}
+
+                {/* created date */}
+                {/* <td onClick={() => { setCurrentTask(task); }} className="px-6">
+                    <div className="w-fit px-2 py-1">
+                        {formatSmartDate(task.date_created)}
+                    </div>
+                </td> */}
+
+                {/* task option */}
                 <td className=" w-10">
                     {/* <div className="w-fit px-2 border border-transparent hover:border-gray-400 rounded"> */}
                     <button

@@ -24,6 +24,7 @@ export default function Home() {
   const [isEnableAddTask, setIsEnableAddTask] = useState(false);
   const [currentProjectId, setCurrentprojectId] = useState(null);
   const [viewSideBar, setViewSidebar] = useState(true);
+  const [description, setDescription] = useState(null);
 
   const router = useRouter();
 
@@ -95,7 +96,6 @@ export default function Home() {
       console.log(data.message); // "Logged out"
       if (res.ok) {
         router.push('/login');
-        alert('Logout successfully!!')
       } else {
         console.error('Logout failed');
       }
@@ -106,16 +106,20 @@ export default function Home() {
 
   return (
     <div className="flex">
-      <Sidebar user_id={u_id} role={role} setTasklist={setTasklist} setTopic={setTopic} setIsEnableAddTask={setIsEnableAddTask} setCurrentProjectId={setCurrentprojectId} viewSideBar={viewSideBar} setViewSidebar={setViewSidebar} />
+      <Sidebar user_id={u_id} role={role} setTasklist={setTasklist} setTopic={setTopic} setIsEnableAddTask={setIsEnableAddTask} setCurrentProjectId={setCurrentprojectId} viewSideBar={viewSideBar} setViewSidebar={setViewSidebar} setDescription={setDescription} />
 
       <div className={`${viewSideBar ? 'w-[calc(100%-16rem)]' : 'w-full'} h-screen overflow-y-auto`}>
         <div>
 
           <div className="relative bg-white dark:bg-gray-700 rounded-lg text-gray-900  dark:text-white mb-3">
-            <div className="flex py-2 bg-gray-200 dark:bg-gray-800 border-b border-gray-300">
-              <div className="bg-black mx-5 px-10 py-3 rounded-full w-96 border-white border-4 dark:border-white">
-                <h1 className="text-3xl font-bold text-white text-center">{topic}</h1>
+            <div className="flex py-2 bg-white dark:bg-gray-800 border-b border-gray-300">
+              <div>
+                <div className="mx-5 px-10 py-1 border-r border-r-2 border-r-black w-fit">
+                  <h1 className="text-3xl font-bold text-left">{topic}</h1>
+                </div>
+                {description && <span>{}</span>}
               </div>
+
               <button
                 onClick={handleLogout}
                 className="absolute flex right-0 mx-5 rounded-full hover:bg-red-400 dark:hover:bg-red-500 p-2 text-black"
@@ -147,7 +151,7 @@ export default function Home() {
                   onClick={() => setShowDescription(false)}  // Optional: close on background click
                 />
                 {/* Sidebar */}
-                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} userId={u_id} setTasklist={setTasklist}/>
+                <Descriptionbar currentTask={currentTask} role={role} setShowDescription={setShowDescription} userId={u_id} setTasklist={setTasklist} />
               </div>
             </OutsideClickWrapper>
           </div>

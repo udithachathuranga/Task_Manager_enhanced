@@ -6,6 +6,7 @@ function Login() {
   const [u_name, setU_name] = React.useState('');
   const [password, setPassword] = React.useState('');
   const router = useRouter();
+  const [error, setError] = React.useState(null);
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -19,10 +20,9 @@ function Login() {
   const data = await res.json();
 
   if (res.ok) {
-    alert('Login successful!');
     router.push('/');
   } else {
-    alert(data.error || 'Login failed');
+    setError(data.error || 'Login failed');
   }
 };
 
@@ -48,7 +48,7 @@ function Login() {
             />
           </div>
 
-          <div className="mb-5">
+          <div className="mb-3">
             <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
               Your password
             </label>
@@ -62,6 +62,12 @@ function Login() {
               required
             />
           </div>
+
+          {error &&
+            <span className='text-xs text-red-500 mb-20'>
+              {error}
+            </span>
+          }
 
           <div className="flex items-start mb-5">
             <div className="flex items-center h-5">

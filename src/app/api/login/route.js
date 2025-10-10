@@ -10,16 +10,10 @@ export async function POST(req) {
     const { u_name, password } = await req.json();
 
     const user = await prisma.user.findFirst({ where: { u_name } });
-
-    if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-
     const isPasswordValid = await bcrypt.compare(password, user.hash_pwd);
-    if (!isPasswordValid) {
-      const hashedPassword = await bcrypt.hash('1234', 10);
-      console.log(hashedPassword);
-      return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
+    
+    if (!isPasswordValid || !user) {
+      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
     }
 
     const token = jwt.sign(

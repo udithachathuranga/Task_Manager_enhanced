@@ -289,26 +289,23 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
                 Task Name
               </th>
               <th></th>
-              <th scope="col" className="px-6 py-3 w-96">
-                Project
+              <th scope="col" className="pl-6 py-3 w-[400px]">
+                Assignee
+              </th>
+              <th scope="col" className="pl-6 py-3">
+                Priority
               </th>
               <th scope="col" className="px-6 py-3">
                 Due date
               </th>
-              <th scope="col" className="pl-6 py-3 w-[400px]">
-                Assignee
-              </th>
               <th scope="col" className="px-6 py-3">
-                Date Created
+                Start Date
               </th>
               <th scope="col" className="px-3 py-3">
                 Time Estimated
               </th>
               <th scope="col" className="px-6 py-3">
                 Time Spent
-              </th>
-              <th scope="col" className="pl-6 py-3">
-                Priority
               </th>
               <th scope="col" className="pl-6 py-3">
                 Created By

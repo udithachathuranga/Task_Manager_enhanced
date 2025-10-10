@@ -56,7 +56,7 @@ function NewProject() {
                                 required
                             />
                         </div>
-                        <div className="mb-5 w-96">
+                        {/* <div className="mb-5 w-96">
                             <label htmlFor="p_title" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 Project Title
                             </label>
@@ -68,11 +68,11 @@ function NewProject() {
                                 onChange={(e) => setP_title(e.target.value)}
                                 required
                             />
-                        </div>
+                        </div> */}
 
                     </div>
 
-                    <div className="mb-5 w-full">
+                    {/* <div className="mb-5 w-full">
                         <label htmlFor="p_description" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                             Description
                         </label>
@@ -84,7 +84,7 @@ function NewProject() {
                             onChange={(e) => setP_description(e.target.value)}
                         //required
                         />
-                    </div>
+                    </div> */}
 
                     <div className='flex gap-4 w-full'>
 

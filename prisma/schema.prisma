@@ -25,6 +25,7 @@ model User {
   hash_pwd String
 
   tasks            Task[]         @relation("AddedTasks") 
+  time_sheets      TimeSheet[]    @relation("AddedTimeSheet")
   created_projects Project[]      @relation("CreatedProjects") 
   user_projects    User_Project[] 
   user_tasks       User_Task[]
@@ -53,9 +54,9 @@ model Task {
   t_description  String?
   due_date       DateTime?
   date_created   DateTime
+  start_date     DateTime?
   time_estimate  Float?
   priority       Int?
-  time_spent     Float?
   task_status_id String
   task_status    Tstatus @relation(fields: [task_status_id], references: [t_status_id], onDelete: Cascade) 
   p_id           String?
@@ -67,8 +68,8 @@ model Task {
   parent_task    Task?      @relation("ParentTaskRelation", fields: [parent_task_id], references: [t_id], onDelete: Cascade)
   subTasks       Task[]     @relation("ParentTaskRelation") 
   
-  user_tasks     User_Task[] 
-  timeSheets     TimeSheet[] 
+  user_tasks     User_Task[]
+  timeSheets     TimeSheet[]
   activities Activity[]
   comments Comment[]
 }
@@ -114,6 +115,8 @@ model TimeSheet {
   task     Task     @relation(fields: [taskId], references: [t_id], onDelete: Cascade)
   date     DateTime
   duration Float
+  added_by_id    String
+  added_by       User        @relation("AddedTimeSheet", fields: [added_by_id], references: [u_id], onDelete: Cascade) 
 }
 
 model Notification {

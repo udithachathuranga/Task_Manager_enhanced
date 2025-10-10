@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { motion, AnimatePresence } from "framer-motion";
 
-function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, setCurrentProjectId, viewSideBar, setViewSidebar }) {
+function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, setCurrentProjectId, viewSideBar, setViewSidebar, setDescription }) {
     const [projects, setProjects] = useState();
     const [users, setUsers] = useState();
     const [contextMenu, setContextMenu] = useState(null); // { x, y, projectId }
@@ -50,6 +50,7 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
     const handleAllClick = async () => {
         setCurrentProjectId(null);
         setTopic("All");
+        setDescription(null);
         if (role == "1") {
             //fetch all tasks
             const res = await fetch('/api/all_tasks');
@@ -224,7 +225,7 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                                     <ul className="space-y-2 font-medium">
                                         {projects?.map((project, index) => (
                                             <li key={project.p_id}>
-                                                <div onClick={() => handleProjectClick(project.p_id, project.p_name)} onContextMenu={(e) => handleContextMenu(e, project.p_id)} className="flex items-center px-2 py-1 text-gray-900 rounded-lg dark:text-white hover:shadow-md hover:cursor-pointer transition-transform hover:scale-[1.05] dark:hover:bg-gray-700 group">
+                                                <div onClick={() => handleProjectClick(project.p_id, project.p_name, project.p_)} onContextMenu={(e) => handleContextMenu(e, project.p_id)} className="flex items-center px-2 py-1 text-gray-900 rounded-lg dark:text-white hover:shadow-md hover:cursor-pointer transition-transform hover:scale-[1.05] dark:hover:bg-gray-700 group">
                                                     <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
                                                         <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
                                                     </svg>

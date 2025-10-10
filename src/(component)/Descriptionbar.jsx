@@ -222,6 +222,54 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
       hour12: true,
     });
 
+  const TZ = "Asia/Colombo";
+  const MS_DAY = 24 * 60 * 60 * 1000;
+
+  function zonedMidnightUTC(d) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: TZ, year: "numeric", month: "numeric", day: "numeric",
+    }).formatToParts(d);
+    const get = t => Number(parts.find(p => p.type === t).value);
+    const utc = Date.UTC(get("year"), get("month") - 1, get("day"));
+    const dayIndex = new Date(utc).getUTCDay(); // 0..6
+    return { utc, dayIndex };
+  }
+
+  function formatSmartDate(iso) {
+    const taskDate = new Date(iso);
+    const task = zonedMidnightUTC(taskDate);
+    const today = zonedMidnightUTC(new Date());
+    const diffDays = Math.round((task.utc - today.utc) / MS_DAY);
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === -1) return "Yesterday";
+    if (diffDays === 1) return "Tomorrow";
+
+    // This week? (Mon–Sun in Colombo)
+    const mondayOffset = ((today.dayIndex + 6) % 7);
+    const weekStart = today.utc - mondayOffset * MS_DAY;
+    const weekEnd = weekStart + 6 * MS_DAY;
+
+    if (task.utc >= weekStart && task.utc <= weekEnd) {
+      // 3-letter weekday, e.g., "Wed"
+      return new Intl.DateTimeFormat("en-US", {
+        timeZone: TZ, weekday: "short",
+      }).format(taskDate);
+    }
+
+    // Fallback date like "09 Oct 2025"
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: TZ, day: "2-digit", month: "short", year: "numeric",
+    }).format(taskDate);
+  }
+
+  const isOverdue = (iso) => {
+    if (!iso) return false;
+    const due = zonedMidnightUTC(new Date(iso)).utc;   // local (Colombo) midnight of due date
+    const today = zonedMidnightUTC(new Date()).utc;    // local (Colombo) midnight of today
+    return due < today;                                // strictly before today
+  };
+
   return (
     <aside id="separator-sidebar" className="fixed rounded-lg top-0 right-0 z-40 w-1/2 h-screen transition-transform -translate-x-full sm:translate-x-0 border-l border-black dark:border-white" aria-label="Sidebar">
 
@@ -244,9 +292,9 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
           </div>
 
           {currentTask.due_date ? (
-            <div className='flex items-center mx-10 text-gray-600'>
+            <div className='flex items-center ml-10 text-gray-600'>
               <strong>Due : </strong>
-              <p className='mx-5'>{new Date(currentTask.due_date).toLocaleDateString()}</p>
+              <span className={`${currentTask.due_date && isOverdue(currentTask.due_date) && currentTask.task_status_id != 3 ? "text-red-600" : "text-gray-700"}`}>{currentTask.due_date ? formatSmartDate(currentTask.due_date) : "due"}</span>
             </div>
           ) : (
             <div className='mx-10 text-xs hover:border hover:b-gray-400 p-2 rounded-xl text-red-500'>No Due Dates for this task.</div>
