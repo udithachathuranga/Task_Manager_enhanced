@@ -1,13 +1,21 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function GET(request) {
-  const { searchParams } = new URL(request.url);
-  const userId = searchParams.get('user_id');
+function decodeJwt(token) {
+    try {
+        const [, payload] = token.split('.');
+        const json = Buffer.from(payload, 'base64url').toString('utf8'); // Node 16+
+        return JSON.parse(json);
+    } catch {
+        return null;
+    }
+}
 
-  if (!userId) {
-    return NextResponse.json({ error: 'Missing user_id' }, { status: 400 });
-  }
+export async function GET(req) {
+
+  const token = req.cookies.get('token')?.value;
+  const claims = token ? decodeJwt(token) : null;
+  const userId = claims.userId;
 
   try {
     // Step 1: Get related task IDs from User_task

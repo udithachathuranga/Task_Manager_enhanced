@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import OutsideClickWrapper from '../(component)/OutsideClickWrapper';
+import { div } from 'framer-motion/client';
 
-function Row({ task, showDescription, setShowDescription, setCurrentTask, subLevel, setTasklist, userId, parentTaskId, setParentSubTaskList }) {
+function Row({ task, showDescription, setShowDescription, setCurrentTask, subLevel, setTasklist, userId, parentTaskId, setParentSubTaskList, viewSideBar }) {
 
     const newRowRef = useRef(null);
 
@@ -57,40 +58,74 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     }, [newRow]);
 
     const colorMap = {
-        '1': 'bg-rose-600',
-        '2': 'bg-indigo-600',
-        '3': 'bg-teal-600',
+        '1': 'bg-pink-600',
+        '2': 'bg-rose-600',
+        '3': 'bg-orange-600',
+        '4': 'bg-sky-600',
+        '5': 'bg-blue-600',
+        '6': 'bg-teal-600',
     };
 
     const textColorMap = {
-        '1': 'text-rose-600',
-        '2': 'text-indigo-600',
-        '3': 'text-teal-600',
+        '1': 'text-pink-600',
+        '2': 'text-rose-600',
+        '3': 'text-orange-600',
+        '4': 'text-sky-600',
+        '5': 'text-blue-600',
+        '6': 'text-teal-600',
     };
 
     const statusName = {
-        '1': 'Open',
-        '2': 'In Progress',
-        '3': 'Completed'
+        '1': 'To Do',
+        '2': 'On Hold',
+        '3': 'In Progress',
+        '4': 'QA',
+        '5': 'Production',
+        '6': 'Completed',
     }
 
     const getIcon = (status) => {
         switch (status) {
             case '1':
                 return (
-                    <svg className={`${textColorMap['1']} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" strokeWidth="3">
+                    // tag
+                    <svg className={`${textColorMap['1']} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.583 8.445h.01M10.86 19.71l-6.573-6.63a.993.993 0 0 1 0-1.4l7.329-7.394A.98.98 0 0 1 12.31 4l5.734.007A1.968 1.968 0 0 1 20 5.983v5.5a.992.992 0 0 1-.316.727l-7.44 7.5a.974.974 0 0 1-1.384.001Z" />
                     </svg>
                 );
             case '2':
                 return (
-                    <svg className={`${textColorMap['2']} dark:text-white`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" strokeWidth="3">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    // pause
+                    <svg className={`w-4 h-5 ${textColorMap['2']}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M8 5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H8Zm7 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1Z" clip-rule="evenodd" />
                     </svg>
                 );
             case '3':
                 return (
-                    <svg className={`${textColorMap['3']} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" strokeWidth="3">
+                    // clock
+                    <svg className={`${textColorMap['3']} dark:text-white`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                );
+            case '4':
+                return (
+                    // setting
+                    <svg className={`w-5 h-5 ${textColorMap['4']}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13v-2a1 1 0 0 0-1-1h-.757l-.707-1.707.535-.536a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0l-.536.535L14 4.757V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v.757l-1.707.707-.536-.535a1 1 0 0 0-1.414 0L4.929 6.343a1 1 0 0 0 0 1.414l.536.536L4.757 10H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h.757l.707 1.707-.535.536a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l.536-.535 1.707.707V20a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-.757l1.707-.708.536.536a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-.535-.536.707-1.707H20a1 1 0 0 0 1-1Z" />
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                    </svg>
+                );
+            case '5':
+                return (
+                    // refresh
+                    <svg className={`w-5 h-5 ${textColorMap['5']}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4" />
+                    </svg>
+                );
+            case '6':
+                return (
+                    // check mark
+                    <svg className={`${textColorMap['6']} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
                         <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                     </svg>
                 );
@@ -101,7 +136,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
     const colorClass = colorMap[name] || 'bg-gray-400';
     const textClass = textColorMap[name] || 'text-gray-400';
-    const marginLeft = 4 + 50 * subLevel;
+    const marginLeft = 50 * subLevel;
     subLevel++;
 
     const TZ = "Asia/Colombo";
@@ -143,7 +178,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
         // Fallback: DD/MM/YYYY (e.g., "03/10/2025")
         return new Intl.DateTimeFormat("en-GB", {
-            timeZone: TZ, day: "2-digit", month: "2-digit", year: "numeric",
+            timeZone: TZ, day: "2-digit", month: "2-digit", year: "2-digit",
         }).format(taskDate);
     }
 
@@ -248,32 +283,32 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
         });
     }
 
-    const deleteTask = (taskId) => {
+    const deleteTask = async (taskId) => {
         console.log("Deleting task with ID:", taskId);
+
         const confirmed = window.confirm("Are you sure you want to delete this task?");
         if (!confirmed) {
             console.log("Task deletion cancelled");
             return;
         }
+
         try {
-            fetch(`/api/delete_task/${taskId}`, {
-                method: 'DELETE',
-            })
-                .then(res => {
-                    if (res.ok) {
-                        if (parentTaskId) {
-                            setParentSubTaskList(prev => prev.filter(task => task.t_id !== taskId));
-                        } else {
-                            setTasklist(prev => prev.filter(task => task.t_id !== taskId));
-                        }
-                    } else {
-                        throw new Error("Failed to delete task");
-                    }
-                })
-                .catch(err => {
-                    console.error("Error deleting task:", err);
-                    alert("Failed to delete task");
-                });
+            const res = await fetch(`/api/delete_task/${taskId}`, {
+                method: "DELETE",
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                if (parentTaskId) {
+                    setParentSubTaskList((prev) => prev.filter((task) => task.t_id !== taskId));
+                } else {
+                    setTasklist((prev) => prev.filter((task) => task.t_id !== taskId));
+                }
+            } else {
+                console.error("Failed to delete task:", data.message);
+                alert(data.message || "Failed to delete task.");
+            }
         } catch (error) {
             console.error("Error in deleteTask function:", error);
             alert("An error occurred while deleting the task.");
@@ -288,8 +323,8 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 body: JSON.stringify({
                     t_id: task.t_id,
                     t_title: taskTitle,
-                    start_date: new Date(startDate).toISOString(),
-                    due_date: new Date(dueDate).toISOString(),
+                    start_date: startDate ? new Date(startDate).toISOString() : null,
+                    due_date: dueDate ? new Date(dueDate).toISOString() : null,
                     time_estimate: parseInt(timeEstimate, 10),
                     priority: task.priority,//parseInt(priority, 10),
                     task_status_id: task.task_status_id,
@@ -392,12 +427,12 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
         <>
             <tr
                 key={task.t_id}
-                className="group bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-50 z-0 text-size-2xl"
+                className="group border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer hover:bg-gray-50 z-0 text-size-2xl"
             >
                 {/* task title */}
                 <th
                     scope="row"
-                    className="flex items-center font-medium text-gray-700 whitespace-nowrap dark:text-white"
+                    className={`flex items-center font-medium text-gray-700`}
                     style={{ marginLeft: `${marginLeft}px` }}
                 >
                     {subtasks.length > 0 ? (
@@ -419,12 +454,12 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     </div>
 
                     {editTaskTitle ? (
-                        <OutsideClickWrapper onOutsideClick={() => { setEditTaskTitle(false); updateTask(); }}>
+                        <OutsideClickWrapper onOutsideClick={() => { if (taskTitle != "") { setEditTaskTitle(false); updateTask(); } else { alert("Task name cannot be empty.") } }}>
                             <input
                                 type="text"
                                 id="taskTitle"
                                 placeholder='Task name'
-                                className="text-gray-900 font-bold text-sm rounded-sm w-40 p-1"
+                                className="text-gray-700 font-bold text-sm rounded-sm w-80 py-1 focus:outline-none focus:ring-0"
                                 value={taskTitle}
                                 onChange={(e) => setTaskTitle(e.target.value)}
                                 autoFocus
@@ -432,22 +467,22 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                             />
                         </OutsideClickWrapper>
                     ) : (
-                        <strong onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className='transition-transform mt-1 hover:scale-[1.05]'>{task.t_title}</strong>
+                        <strong onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className={`block truncate transition-transform mt-1 hover:scale-[1.05] overflow-hidden text-ellipsis whitespace-nowrap ${viewSideBar ? 'w-80' : 'w-[400px]'}`} title={task.title}>{task.t_title}</strong>
                     )}
 
                 </th>
 
                 {/* buttons */}
-                <th>
+                <th className='px-4 w-20'>
                     <div className='flex items-center'>
                         {/* edit task */}
-                        <div onClick={() => { setEditTaskTitle(true) }} className='border rounded-md mr-1 border-gray-400 w-fit invisible group-hover:visible'>
+                        <div onClick={() => { setEditTaskTitle(true) }} className='border rounded-md mx-2 border-gray-400 invisible group-hover:visible'>
                             <svg className="w-5 h-5 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.779 17.779 4.36 19.918 6.5 13.5m4.279 4.279 8.364-8.643a3.027 3.027 0 0 0-2.14-5.165 3.03 3.03 0 0 0-2.14.886L6.5 13.5m4.279 4.279L6.499 13.5m2.14 2.14 6.213-6.504M12.75 7.04 17 11.28" />
                             </svg>
                         </div>
                         {/* add subtasks */}
-                        <div className='border rounded-md mr-1 border-gray-400 w-fit invisible group-hover:visible' onClick={() => { setNewRow(true); setViewSubTasks(true); }}>
+                        <div onClick={() => { setNewRow(true); setViewSubTasks(true); }} className='border rounded-md border-gray-400 invisible group-hover:visible' >
                             <svg className="w-5 h-5 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
                                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 12h14m-7 7V5" />
                             </svg>
@@ -457,70 +492,82 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 </th>
 
                 {/* asignees */}
-                <td onClick={() => { setCurrentTask(task); }} className="pl-6">
-                    <div className="relative flex group/avatar -space-x-1 rtl:space-x-reverse w-[100px]">
+                <td onClick={() => { setCurrentTask(task); }} className="px-2 w-32">
+                    <div className="w-[100px]">
                         {assigns && assigns.length > 0 ? (
-                            <>
+                            <div className="relative flex group/avatar -space-x-1 rtl:space-x-reverse px-3">
                                 {assigns.map((assign, index) => (
                                     <div
                                         key={index}
-                                        className="w-7 h-7 border-2 border-white rounded-full bg-blue-600 dark:border-gray-800 text-white flex items-center justify-center font-semibold uppercase" title={assign}
+                                        className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800 text-white text-xs bg-blue-700 flex items-center justify-center font-semibold uppercase" title={assign}
                                     >
                                         {assign.substring(0, 2) || "NA"}
                                     </div>
                                 ))
                                 }
                                 <div className="hidden group-hover/avatar:flex items-center justify-center w-7 h-7 text-xs font-medium text-white bg-gray-300 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }} title='Add Assi'>+</div>
-                            </>
+                            </div>
                         ) : (
-                            <div className='text-xs hover:border hover:b-gray-400 p-1 rounded-xl' onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>No assigns</div>
+                            <div className='text-xs hover:border hover:border-gray-400 rounded-md py-1 px-4' onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>
+                                <svg class="w-5 h-5 text-gray-400 dark:text-white cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12h4m-2 2v-4M4 18v-1a3 3 0 0 1 3-3h4a3 3 0 0 1 3 3v1a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Zm8-10a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                </svg>
+                            </div>
                         )}
                     </div>
                 </td>
 
                 {/* priority */}
-                <td onClick={() => { setCurrentTask(task); }} >
-                    <div onClick={(e) => handlePriorityClick(e, task.t_id)} className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
-                        <div className="flex items-center px-6">
+                <td onClick={() => { setCurrentTask(task); }} className='w-20'>
+                    <div onClick={(e) => handlePriorityClick(e, task.t_id)} className="py-1 border border-transparent hover:border-gray-400 rounded w-fit">
+                        <div className="flex items-center px-4">
                             {priorityFlag(task.priority)}
                         </div>
                     </div>
                 </td>
 
                 {/* due date */}
-                <td className="px-6">
+                <td className="px-3 w-24">
                     {editDueDate ? (
                         <OutsideClickWrapper onOutsideClick={() => { setEditDueDate(false); updateTask(); }}>
                             <input
                                 type="date"
                                 id="due_date"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-fit px-2.5 py-1"
-                                // placeholder="YYYY-MM-DD"
+                                className="text-gray-700 text-sm rounded-lg block w-130 py-1 focus:outline-none focus:ring-0"
                                 value={dueDate}
                                 onChange={(e) => { setDueDate(e.target.value) }}
                                 autoFocus
-                            //required
                             />
                         </OutsideClickWrapper>
                     ) : (
                         <div
                             onClick={() => setEditDueDate(true)}
-                            className={`w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded ${task.due_date && isOverdue(task.due_date) && task.task_status_id != 3 ? "text-red-600" : "text-gray-700"
+                            className={`w-fit ${task.due_date && isOverdue(task.due_date) && task.task_status_id != 3 ? "text-red-600" : "text-gray-700"
                                 }`}
                         >
-                            {task.due_date ? formatSmartDate(task.due_date) : "due"}
+                            {task.due_date ?
+                                <div className='border border-transparent hover:border-gray-400 rounded py-1 text-gray-500'>
+                                    {formatSmartDate(task.due_date)}
+                                </div>
+                                :
+                                <div className='border border-transparent hover:border-gray-400 rounded-md py-1 px-4'>
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M4 9.05H3v2h1v-2Zm16 2h1v-2h-1v2ZM10 14a1 1 0 1 0 0 2v-2Zm4 2a1 1 0 1 0 0-2v2Zm-3 1a1 1 0 1 0 2 0h-2Zm2-4a1 1 0 1 0-2 0h2Zm-2-5.95a1 1 0 1 0 2 0h-2Zm2-3a1 1 0 1 0-2 0h2Zm-7 3a1 1 0 0 0 2 0H6Zm2-3a1 1 0 1 0-2 0h2Zm8 3a1 1 0 1 0 2 0h-2Zm2-3a1 1 0 1 0-2 0h2Zm-13 3h14v-2H5v2Zm14 0v12h2v-12h-2Zm0 12H5v2h14v-2Zm-14 0v-12H3v12h2Zm0 0H3a2 2 0 0 0 2 2v-2Zm14 0v2a2 2 0 0 0 2-2h-2Zm0-12h2a2 2 0 0 0-2-2v2Zm-14-2a2 2 0 0 0-2 2h2v-2Zm-1 6h16v-2H4v2ZM10 16h4v-2h-4v2Zm3 1v-4h-2v4h2Zm0-9.95v-3h-2v3h2Zm-5 0v-3H6v3h2Zm10 0v-3h-2v3h2Z" />
+                                    </svg>
+                                </div>
+                            }
                         </div>
                     )}
                 </td>
 
                 {/* start date */}
-                <td className="px-6">
+                <td className="px-3 w-24">
                     {editStartDate ? (
                         <OutsideClickWrapper onOutsideClick={() => { setEditStartDate(false); updateTask(); }}>
                             <input
                                 type="date"
                                 id="start_date"
-                                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-fit px-2.5 py-1"
+                                className="text-gray-900 text-sm rounded-lg focus:outline-none focus:ring-0 block w-fit py-1"
                                 // placeholder="YYYY-MM-DD"
                                 value={startDate}
                                 onChange={(e) => { setStartDate(e.target.value) }}
@@ -531,15 +578,26 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     ) : (
                         <div
                             onClick={() => setEditStartDate(true)}
-                            className={`w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded`}
+                            className={`w-fit`}
                         >
-                            {task.start_date ? formatSmartDate(task.start_date) : "due"}
+                            {/* {task.start_date ? formatSmartDate(task.start_date) : "due"} */}
+                            {task.due_date ?
+                                <div className='border border-transparent hover:border-gray-400 rounded py-1'>
+                                    {formatSmartDate(task.due_date)}
+                                </div>
+                                :
+                                <div className='border border-transparent hover:border-gray-400 rounded-md py-1 px-4'>
+                                    <svg class="w-5 h-5 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                        <path fill="currentColor" d="M4 9.05H3v2h1v-2Zm16 2h1v-2h-1v2ZM10 14a1 1 0 1 0 0 2v-2Zm4 2a1 1 0 1 0 0-2v2Zm-3 1a1 1 0 1 0 2 0h-2Zm2-4a1 1 0 1 0-2 0h2Zm-2-5.95a1 1 0 1 0 2 0h-2Zm2-3a1 1 0 1 0-2 0h2Zm-7 3a1 1 0 0 0 2 0H6Zm2-3a1 1 0 1 0-2 0h2Zm8 3a1 1 0 1 0 2 0h-2Zm2-3a1 1 0 1 0-2 0h2Zm-13 3h14v-2H5v2Zm14 0v12h2v-12h-2Zm0 12H5v2h14v-2Zm-14 0v-12H3v12h2Zm0 0H3a2 2 0 0 0 2 2v-2Zm14 0v2a2 2 0 0 0 2-2h-2Zm0-12h2a2 2 0 0 0-2-2v2Zm-14-2a2 2 0 0 0-2 2h2v-2Zm-1 6h16v-2H4v2ZM10 16h4v-2h-4v2Zm3 1v-4h-2v4h2Zm0-9.95v-3h-2v3h2Zm-5 0v-3H6v3h2Zm10 0v-3h-2v3h2Z" />
+                                    </svg>
+                                </div>
+                            }
                         </div>
                     )}
                 </td>
 
                 {/* time estimate */}
-                <td onClick={() => { setEditTimeEstimate(true) }} >
+                <td onClick={() => { setEditTimeEstimate(true) }} className='w-28'>
                     {editTimeEstimate ? (
                         <OutsideClickWrapper onOutsideClick={() => { setEditTimeEstimate(false); updateTask(); }}>
                             <input
@@ -574,7 +632,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 </td>
 
                 {/* time spent */}
-                <td onClick={() => { setEditTimeSpent(true) }} >
+                <td onClick={() => { setEditTimeSpent(true) }} className='w-24'>
                     {editTimeSpent ? (
                         <OutsideClickWrapper onOutsideClick={() => { setEditTimeSpent(false); updateTask(); }}>
                             <input
@@ -609,27 +667,13 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
                 {/* added by */}
                 <td
-                    onClick={() => { setCurrentTask(task); }} className="px-6">
+                    onClick={() => { setCurrentTask(task); }} className="px-7 w-10">
                     <div className="relative flex items-center space-x-2">
-                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold uppercase" title={task.added_by?.u_name}>
+                        <div className="w-6 h-6 rounded-full text-white bg-blue-700 flex items-center justify-center font-semibold uppercase text-xs" title={task.added_by?.u_name}>
                             {task.added_by?.u_name?.substring(0, 2) || "NA"}
                         </div>
                     </div>
                 </td>
-
-                {/* project */}
-                {/* <td className="px-5">
-                    <div onClick={() => { setCurrentTask(task); }} className="w-full py-1">
-                        {task.project?.p_name ?? "kkkk"}
-                    </div>
-                </td> */}
-
-                {/* created date */}
-                {/* <td onClick={() => { setCurrentTask(task); }} className="px-6">
-                    <div className="w-fit px-2 py-1">
-                        {formatSmartDate(task.date_created)}
-                    </div>
-                </td> */}
 
                 {/* task option */}
                 <td className=" w-10">
@@ -663,20 +707,18 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     >
 
                         {/* Task Name */}
-                        <td colSpan={4} className=" px-14 w-full" style={{ marginLeft: `${marginLeft}px` }}>
-                            <div className='flex items-center w-full' style={{ marginLeft: `${marginLeft}px` }}>
-                                <div onClick={(e) => handleStatusIconClick(e)} className='px-2 py-2'> {getIcon(task.t_id, textColorMap[task.task_status_id])} </div>
-                                <input
-                                    type="text"
-                                    id="taskTitle"
-                                    placeholder='Task name'
-                                    className="text-gray-900 text-sm rounded-lg w-full px-2.5 py-1"
-                                    value={newTaskTitle}
-                                    onChange={(e) => setNewTaskTitle(e.target.value)}
-                                    required
-                                    autoFocus
-                                />
-                            </div>
+                        <td className="flex items-center w-full px-20" style={{ marginLeft: `${marginLeft}px` }}>
+                            <div onClick={(e) => handleStatusIconClick(e)} className='pl-5 pr-2 py-2'> {getIcon(task.task_status_id, textColorMap[task.task_status_id])} </div>
+                            <input
+                                type="text"
+                                id="taskTitle"
+                                placeholder='Task name'
+                                className="text-gray-700 text-sm rounded-lg w-full px-2.5 py-1 focus:outline-none focus:ring-0 font-bold"
+                                value={newTaskTitle}
+                                onChange={(e) => setNewTaskTitle(e.target.value)}
+                                required
+                                autoFocus
+                            />
                         </td>
 
                         <td colSpan={4} className="px-2">
@@ -690,7 +732,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                 </button>
                                 <button
                                     type="button"
-                                    className="bg-blue-400 text-black px-2 py-1 mx-1 rounded-lg hover:bg-blue-500 z-0"
+                                    className="text-black px-2 py-1 mx-1 rounded-lg bg-blue-400 hover:bg-blue-500 z-0"
                                 // onClick={handleNewTaskSubmit}
                                 >
                                     Save
@@ -699,6 +741,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                         </td>
 
                     </tr>
+
                 }
             </>
             }
@@ -713,7 +756,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
                                 <li className='flex items-center'>
                                     <div className="relative flex items-center space-x-2">
-                                        <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold uppercase" title={u.u_name}>
+                                        <div className="w-7 h-7 rounded-full text-white bg-blue-700 flex items-center justify-center font-semibold uppercase" title={u.u_name}>
                                             {u.u_name?.substring(0, 2) || "NA"}
                                         </div>
                                     </div>

@@ -20,14 +20,10 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                 console.log("All projects:", data);
             } else {
                 // Non-admin: fetch only user's projects
-                const res = await fetch('/api/user-projects', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id }),
-                });
+                const res = await fetch(`/api/user_projects`);
                 const data = await res.json();
                 setProjects(data);
-                console.log("User projects:", projects);
+                console.log("User projects:", data);
             }
         };
 
@@ -191,11 +187,11 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                         transition={{ duration: 0.4, ease: "easeInOut" }}
                     >
                         <div className="top-0 left-0 w-64 h-screen bg-gray-100 dark:bg-gray-800 overflow-y-auto transition-transform -translate-x-full sm:translate-x-0 border-r border-gray-300" aria-label="Sidebar">
-                            <div className="px-3 py-4 overflow-y-auto">
-                                <Image className="rounded-lg shadow-xl" src="/images/eblix.jpg" width={100} height={40} alt="eBlix Logo" />
-                                {/* horizontal line */}
-                                <div className='bg-gray-300 h-1 w-full mt-4 rounded-full'>
+                            <div className="px-3 overflow-y-auto">
+                                <div className='py-2 border-b border-gray-300'>
+                                    <Image className="rounded-lg border border-gray-300" src="/images/eblix.jpg" width={100} height={40} alt="eBlix Logo" />
                                 </div>
+                            
                                 {/* Collapse Sidebar Icon*/}
                                 <div className="absolute top-0 right-0 p-4" onClick={() => setViewSidebar(false)}>
                                     <svg className=" w-6 h-6 text-gray-400 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
@@ -213,6 +209,7 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                                         </div>
                                     </li>
                                 </ul>
+
                                 {/* all projects */}
                                 <div>
                                     <div className="bg-gray-300 dark:bg-gray-700 text-gray-900  dark:text-white my-4">
@@ -220,7 +217,6 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                                             Projects
                                         </h1>
                                     </div>
-
                                     {/* projects */}
                                     <ul className="space-y-2 font-medium">
                                         {projects?.map((project, index) => (

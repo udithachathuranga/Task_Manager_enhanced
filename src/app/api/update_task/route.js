@@ -25,7 +25,7 @@ export async function PUT(req) {
   try {
     const body = await req.json();
     const {
-      t_id,              // Task ID to update
+      t_id,
       t_title,
       start_date,
       t_description,
@@ -56,6 +56,7 @@ export async function PUT(req) {
 
     let content = "";
 
+    // check diferences & report the activity
     if (t_title !== undefined && t_title !== current.t_title) { content = `changed the task title (${t_title}).` }
     if (t_description !== undefined && t_description !== current.t_description) { content = `changed the task description (${t_description}).` }
     if (due_date !== undefined && !sameDate(due_date, current.due_date)) { content = `set due dates to ${due_date}` }

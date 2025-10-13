@@ -6,7 +6,7 @@ import OutsideClickWrapper from './OutsideClickWrapper';
 import Image from 'next/image';
 import Row from './Row';
 
-function Table({ statusId, tasks, setShowDescription, showDescription, currentProjectId, userId, setCurrentTask, setTasklist }) {
+function Table({ statusId, tasks, setShowDescription, showDescription, currentProjectId, userId, setCurrentTask, setTasklist, viewSideBar }) {
   const [newRow, setNewRow] = useState();
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isStatusOpen, setIsStatusOpen] = useState(false);
@@ -26,6 +26,7 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   const [viewSubTasks, setViewSubTasks] = useState(false);
   const [showStatusList, setShowStatusList] = useState(false);
   const [taskStatusId, setTaskStatusId] = useState(statusId);
+  const [viewTasks, setViewTasks] = useState(true);
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -38,40 +39,74 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   const newRowRef = useRef(null);
 
   const colorMap = {
-    '1': 'bg-rose-600',
-    '2': 'bg-indigo-600',
-    '3': 'bg-teal-600',
+    '1': 'bg-pink-600',
+    '2': 'bg-rose-600',
+    '3': 'bg-orange-600',
+    '4': 'bg-sky-600',
+    '5': 'bg-blue-600',
+    '6': 'bg-teal-600',
   };
 
   const textColorMap = {
-    '1': 'text-rose-600',
-    '2': 'text-indigo-600',
-    '3': 'text-teal-600',
+    '1': 'bg-pink-600',
+    '2': 'bg-rose-600',
+    '3': 'bg-orange-600',
+    '4': 'bg-sky-600',
+    '5': 'bg-blue-600',
+    '6': 'bg-teal-600',
   };
 
   const statusNameMap = {
-    '1': 'OPEN',
-    '2': 'ON GOING',
-    '3': 'COMPLETED',
+    '1': 'TO DO',
+    '2': 'ON HOLD',
+    '3': 'IN PROGRESS',
+    '4': 'QA',
+    '5': 'PRODUCTION',
+    '6': 'COMPLETED',
   };
 
   const getIcon = (status_id, color) => {
     switch (status_id) {
       case '1':
         return (
-          <svg className={`${color} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+          // tag
+          <svg className={`${color} dark:text-white font-bold`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.583 8.445h.01M10.86 19.71l-6.573-6.63a.993.993 0 0 1 0-1.4l7.329-7.394A.98.98 0 0 1 12.31 4l5.734.007A1.968 1.968 0 0 1 20 5.983v5.5a.992.992 0 0 1-.316.727l-7.44 7.5a.974.974 0 0 1-1.384.001Z" />
           </svg>
         );
       case '2':
         return (
-          <svg className={`${color} dark:text-white`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          // pause
+          <svg className={`w-5 h-5 ${color}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M8 5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H8Zm7 0a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1Z" clip-rule="evenodd" />
           </svg>
         );
       case '3':
         return (
-          <svg className={`${color} dark:text-white`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+          // clock
+          <svg className={`${color} dark:text-white font-bold`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        );
+      case '4':
+        return (
+          // setting
+          <svg class={`w-5 h-5 ${color}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13v-2a1 1 0 0 0-1-1h-.757l-.707-1.707.535-.536a1 1 0 0 0 0-1.414l-1.414-1.414a1 1 0 0 0-1.414 0l-.536.535L14 4.757V4a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v.757l-1.707.707-.536-.535a1 1 0 0 0-1.414 0L4.929 6.343a1 1 0 0 0 0 1.414l.536.536L4.757 10H4a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1h.757l.707 1.707-.535.536a1 1 0 0 0 0 1.414l1.414 1.414a1 1 0 0 0 1.414 0l.536-.535 1.707.707V20a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-.757l1.707-.708.536.536a1 1 0 0 0 1.414 0l1.414-1.414a1 1 0 0 0 0-1.414l-.535-.536.707-1.707H20a1 1 0 0 0 1-1Z" />
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+          </svg>
+        );
+      case '5':
+        return (
+          // refresh
+          <svg class={`w-5 h-5 ${color}`} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4" />
+          </svg>
+        );
+      case '6':
+        return (
+          // check mark
+          <svg className={`${color} dark:text-white font-bold`} xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.5 11.5 11 14l4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           </svg>
         );
@@ -272,167 +307,185 @@ function Table({ statusId, tasks, setShowDescription, showDescription, currentPr
   }
 
   return (
-    <div className=" mt-3 rounded-lg bg-white dark:bg-gray-800">
+    <>
+      {(statusId == 1 || (tasks && tasks.length > 0)) &&
+        <div className="rounded-lg bg-white dark:bg-gray-800">
+          <div className="flex items-center pt-4 group">
+            <div className='mb-2'>
+              {viewTasks ? (
+                <svg onClick={() => setViewTasks(false)} className="w-4 h-4 text-gray-400 ml-1 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="12" fill="currentColor" viewBox="0 0 24 24" >
+                  <path fillRule="evenodd" d="M18.425 10.271C19.499 8.967 18.57 7 16.88 7H7.12c-1.69 0-2.618 1.967-1.544 3.271l4.881 5.927a2 2 0 0 0 3.088 0l4.88-5.927Z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg onClick={() => setViewTasks(true)} className="w-4 h-4 ml-1 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="12" fill="currentColor" viewBox="0 0 24 24" >
+                  <path fillRule="evenodd" d="M10.271 5.575C8.967 4.501 7 5.43 7 7.12v9.762c0 1.69 1.967 2.618 3.271 1.544l5.927-4.881a2 2 0 0 0 0-3.088l-5.927-4.88Z" clipRule="evenodd" />
+                </svg>
+              )}
+            </div>
+            <div className={`flex items-center ${colorClass} rounded-md w-fit mb-2`}>
+              <div className='px-3 py-1'> {getIcon(taskStatusId, "text-white")} </div>
+              <h1 className="text-1xl mr-4 text-white font-bold">{statusNameMap[statusId] || 'UNKNOWN'}</h1>
+            </div>
+          </div>
 
-      <div className={`flex items-center ${colorClass} rounded-lg w-fit h-70 mb-2`}>
-        <div className='px-3 py-2'> {getIcon(taskStatusId, "text-white")} </div>
-        <h1 className="text-1xl mr-4 text-white">{statusNameMap[statusId] || 'UNKNOWN'}</h1>
-      </div>
+          {viewTasks &&
+            <div className="relative overflow-x-auto mx-5">
 
-      <div className="relative overflow-x-auto">
+              <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
 
-        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                <thead className="text-[10px] text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
+                  <tr>
+                    <th scope="col" className={`px-6 py-1 ${viewSideBar ? 'w-80' : 'w-[400px]'}`}>
+                      Task Name
+                    </th>
+                    <th className='w-24'></th>
+                    <th scope="col" className="px-3 py-1 w-24">
+                      Assignee
+                    </th>
+                    <th scope="col" className="px-3 py-1 w-24">
+                      Priority
+                    </th>
+                    <th scope="col" className="px-3 py-1 w-32">
+                      Due date
+                    </th>
+                    <th scope="col" className="px-3 py-1 w-32">
+                      Start Date
+                    </th>
+                    <th scope="col" className="px-3 py-1 w-28">
+                      Time Estimated
+                    </th>
+                    <th scope="col" className="px-3 py-1 w-24">
+                      Time Spent
+                    </th>
+                    <th scope="col" className="px-1.5 py-1 w-10">
+                      Created By
+                    </th>
+                    <th scope="col" className="py-1 w-5">
+                      {/* option */}
+                    </th>
+                  </tr>
+                </thead>
 
-          <thead className="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-              <th scope="col" className="px-6 py-3 w-[1000px]">
-                Task Name
-              </th>
-              <th></th>
-              <th scope="col" className="pl-6 py-3 w-[400px]">
-                Assignee
-              </th>
-              <th scope="col" className="pl-6 py-3">
-                Priority
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Due date
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Start Date
-              </th>
-              <th scope="col" className="px-3 py-3">
-                Time Estimated
-              </th>
-              <th scope="col" className="px-6 py-3">
-                Time Spent
-              </th>
-              <th scope="col" className="pl-6 py-3">
-                Created By
-              </th>
-              <th scope="col" className="py-3 w-10">
-                {/* option */}
-              </th>
-            </tr>
-          </thead>
+                <tbody>
 
-          <tbody>
+                  {tasks?.map((task, index) => (
+                    <React.Fragment>
+                      <Row task={task} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={0} setTasklist={setTasklist} userId={userId} parentTaskId={null} viewSideBar={viewSideBar} />
+                    </React.Fragment>
+                  ))}
 
-            {tasks?.map((task, index) => (
-              <React.Fragment>
-                <Row task={task} showDescription={showDescription} setShowDescription={setShowDescription} setCurrentTask={setCurrentTask} subLevel={0} setTasklist={setTasklist} userId={userId} parentTaskId={null} />
-              </React.Fragment>
-            ))}
-
-            {newRow && currentProjectId &&
-              <tr
-                onKeyPress={handleKeyPress}
-                ref={newRowRef}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer"
-              >
-
-                {/* Task Name */}
-                <td colSpan={4} className=" px-4 w-full">
-                  <div className='flex items-center w-full'>
-                    <div onClick={(e) => handleStatusIconClick(e)} className='px-2 py-2'> {getIcon(taskStatusId, textColorMap[taskStatusId])} </div>
-                    <input
-                      type="text"
-                      id="taskTitle"
-                      placeholder='Task name'
-                      className="text-gray-900 text-sm rounded-lg w-full px-2.5 py-1"
-                      value={taskTitle}
-                      onChange={(e) => setTaskTitle(e.target.value)}
-                      required
-                      autoFocus
-                    />
-                  </div>
-                </td>
-
-                <td colSpan={4} className="px-2">
-                  <div className='flex items-center'>
-                    <button
-                      type="button"
-                      className="bg-white text-black border border-gray-200 px-2 py-1 mx-1 rounded-lg hover:bg-gray-200 z-0"
-                      onClick={() => { setNewRow(false) }}
+                  {newRow && currentProjectId &&
+                    <tr
+                      onKeyPress={handleKeyPress}
+                      ref={newRowRef}
+                      className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200 cursor-pointer"
                     >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      className="bg-blue-400 text-black px-2 py-1 mx-1 rounded-lg hover:bg-blue-500 z-0"
-                      onClick={handleNewTaskSubmit}
-                    >
-                      Save
-                    </button>
+
+                      {/* Task Name */}
+                      <td className=" px-10 w-64 bg-slate-300">
+                        <div className='flex items-center w-80'>
+                          <div onClick={(e) => handleStatusIconClick(e)} className='px-2 py-2'> {getIcon(taskStatusId, textColorMap[taskStatusId])} </div>
+                          <input
+                            type="text"
+                            id="taskTitle"
+                            placeholder='Task name'
+                            className="text-gray-900 text-sm rounded-lg w-80 px-2.5 py-1 focus:outline-none focus:ring-0"
+                            value={taskTitle}
+                            onChange={(e) => setTaskTitle(e.target.value)}
+                            required
+                            autoFocus
+                          />
+                        </div>
+                      </td>
+
+                      <td colSpan={4} className="px-2">
+                        <div className='flex items-center'>
+                          <button
+                            type="button"
+                            className="bg-white text-black border border-gray-200 px-2 py-1 mx-1 rounded-lg hover:bg-gray-200 z-0"
+                            onClick={() => { setNewRow(false) }}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            className="bg-blue-400 text-black px-2 py-1 mx-1 rounded-lg hover:bg-blue-500 z-0"
+                            onClick={handleNewTaskSubmit}
+                          >
+                            Save
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+
+                  {!newRow && currentProjectId &&
+                    <tr onClick={() => { setNewRow(true); }} className=" dark:bg-gray-800 cursor-pointer hover:bg-gray-300">
+                      <th scope="row" className="flex pl-12 ml-1 py-1 font-medium text-gray-400 whitespace-nowrap dark:text-white">
+                        <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
+                        </svg>
+                        <span className="ms-3">Add Task</span>
+                      </th>
+                    </tr>
+                  }
+
+                </tbody>
+
+              </table>
+
+              {/* Task Option Dropdown */}
+              <OutsideClickWrapper onOutsideClick={() => setIsTaskOptionOpen(false)}>
+                {isTaskOptionOpen &&
+                  <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${isTaskOptionOpen ? 'block' : 'hidden'}`} style={{ top: `${isTaskOptionOpen.y + 40}px`, left: `${isTaskOptionOpen.x - 100}px`, position: 'fixed' }}>
+                    <ul className="py-1">
+
+                      <li className="flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer" onClick={() => { console.log("Edit Task"); setIsTaskOptionOpen(false); allowEditTask(isTaskOptionOpen.taskId) }}>
+                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
+                        </svg>
+                        Edit Task
+                      </li>
+                      <li className="flex items-center px-3 py-1 hover:bg-red-500 hover:text-white cursor-pointer" onClick={() => { console.log("Delete Task"); setIsTaskOptionOpen(false); deleteTask(isTaskOptionOpen.taskId) }}>
+                        <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
+                        </svg>
+                        Delete Task
+                      </li>
+
+                    </ul>
                   </div>
-                </td>
-              </tr>
-            }
+                }
+              </OutsideClickWrapper>
 
-            {!newRow && currentProjectId &&
-              <tr onClick={() => { setNewRow(true); }} className=" dark:bg-gray-800 cursor-pointer hover:bg-gray-300">
-                <th scope="row" className="flex px-6 py-2 font-medium text-gray-400 whitespace-nowrap dark:text-white">
-                  <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
-                  </svg>
-                  <span className="ms-3">Add Task</span>
-                </th>
-              </tr>
-            }
+              {/* Status List Dropdown */}
+              <OutsideClickWrapper onOutsideClick={() => setShowStatusList(false)}>
+                {showStatusList &&
+                  <div ref={newRowRef} className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${showStatusList ? 'block' : 'hidden'}`} style={{ top: `${showStatusList.y + 20}px`, left: `${showStatusList.x - 15}px`, position: 'fixed' }}>
+                    <ul className="py-1">
+                      {Object.entries(statusNameMap).map(([key, value]) => (
+                        <li
+                          key={key}
+                          className="flex items-center hover:bg-gray-100 hover:cursor-pointer p-1"
+                          onClick={() => { setTaskStatusId(key); setShowStatusList(false); }}
+                        >
+                          <div className="mx-3">{getIcon(key, textColorMap[key])}</div>
+                          {value}
+                        </li>
+                      ))}
 
-          </tbody>
+                    </ul>
 
-        </table>
+                  </div>
+                }
+              </OutsideClickWrapper>
 
-        {/* Task Option Dropdown */}
-        <OutsideClickWrapper onOutsideClick={() => setIsTaskOptionOpen(false)}>
-          {isTaskOptionOpen &&
-            <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${isTaskOptionOpen ? 'block' : 'hidden'}`} style={{ top: `${isTaskOptionOpen.y + 40}px`, left: `${isTaskOptionOpen.x - 100}px`, position: 'fixed' }}>
-              <ul className="py-1">
-
-                <li className="flex items-center px-3 py-1 hover:bg-gray-100 cursor-pointer" onClick={() => { console.log("Edit Task"); setIsTaskOptionOpen(false); allowEditTask(isTaskOptionOpen.taskId) }}>
-                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z" />
-                  </svg>
-                  Edit Task
-                </li>
-                <li className="flex items-center px-3 py-1 hover:bg-red-500 hover:text-white cursor-pointer" onClick={() => { console.log("Delete Task"); setIsTaskOptionOpen(false); deleteTask(isTaskOptionOpen.taskId) }}>
-                  <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h14m-9 3v8m4-8v8M10 3h4a1 1 0 0 1 1 1v3H9V4a1 1 0 0 1 1-1ZM6 7h12v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7Z" />
-                  </svg>
-                  Delete Task
-                </li>
-
-              </ul>
             </div>
           }
-        </OutsideClickWrapper>
-
-        {/* Status List Dropdown */}
-        <OutsideClickWrapper onOutsideClick={() => setShowStatusList(false)}>
-          {showStatusList &&
-            <div ref={newRowRef} className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${showStatusList ? 'block' : 'hidden'}`} style={{ top: `${showStatusList.y + 20}px`, left: `${showStatusList.x - 15}px`, position: 'fixed' }}>
-              <ul className="py-1">
-                {Object.entries(statusNameMap).map(([key, value]) => (
-                  <li
-                    key={key}
-                    className="flex items-center hover:bg-gray-100 hover:cursor-pointer p-1"
-                    onClick={() => { setTaskStatusId(key); setShowStatusList(false); }}
-                  >
-                    <div className="mx-3">{getIcon(key, textColorMap[key])}</div>
-                    {value}
-                  </li>
-                ))}
-
-              </ul>
-
-            </div>
-          }
-        </OutsideClickWrapper>
-
-      </div>
-    </div >
-  )
+        </div >
+      }
+    </>
+  );
 }
 
 export default Table

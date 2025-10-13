@@ -14,6 +14,9 @@ export async function GET(request) {
       where: {
         taskId: taskId,
       },
+      include: {
+        added_by: true,
+      },
       orderBy: {
         date: 'desc',
       },

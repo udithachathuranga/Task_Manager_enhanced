@@ -94,28 +94,30 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
     }
   }, [])
 
+  const saveTimeSheet = async () => {
+    const res = await fetch('/api/new_time_sheet', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        taskId: currentTask.t_id,
+        date,
+        duration: parseInt(duration, 10)
+      }),
+    })
+    const result = await res.json();
+    if (res.ok) {
+      setTimeSheets((prev) => [...prev, result.timeSheet]);
+      setNewRow(false);
+    } else {
+      const errorData = await res.json();
+      console.error("Error creating time sheet:", errorData);
+      alert("Failed to create time sheet: " + errorData.error);
+    }
+  }
+
   const handleKeyPress = async (e) => {
     if (e.key === 'Enter') {
-      //create task
-      const res = await fetch('/api/new_time_sheet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          taskId: currentTask.t_id,
-          date,
-          duration: parseInt(duration, 10)
-        }),
-      })
-      const result = await res.json();
-      if (res.ok) {
-        alert("time sheet created successfully");
-        setTimeSheets((prev) => [...prev, result.timeSheet]);
-        setNewRow(false);
-      } else {
-        const errorData = await res.json();
-        console.error("Error creating time sheet:", errorData);
-        alert("Failed to create time sheet: " + errorData.error);
-      }
+      saveTimeSheet();
     }
   };
 
@@ -420,10 +422,12 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
                 <th scope="col" className="px-6 py-3">
                   Time Duration
                 </th>
+                <th scope="col" className="px-6 py-3">
+                  Added By
+                </th>
               </tr>
             </thead>
             <tbody>
-
               {timeSheets?.map((timeSheet, index) => (
                 <tr
                   key={timeSheet.tSheetId}
@@ -432,9 +436,12 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
                   <td className="px-6 py-2">
                     {new Date(timeSheet.date).toLocaleDateString()}
                   </td>
-                  <td className="flex items-center px-6 py-2">
+                  <td className="px-6 py-2">
                     <span className='flex-1 ms-3 whitespace-nowrap'>{timeSheet.duration}</span>
-                    <button>
+                  </td>
+                  <td className="flex items-center px-6 py-2">
+                    <span className='flex-1 ms-3 whitespace-nowrap'>{timeSheet.added_by.u_name}</span>
+                    <button onClick={()=> saveTimeSheet()}>
                       <svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
                         <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 6h.01M12 12h.01M12 18h.01" />
                       </svg>
@@ -454,7 +461,7 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
                     <input
                       type="date"
                       id="date"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                      className="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
                     />
@@ -465,10 +472,15 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
                     <input
                       type="number"
                       id="duration"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+                      className="border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-1"
                       value={duration}
                       onChange={(e) => setDuration(e.target.value)}
                     />
+                  </td>
+                  <td onClick={saveTimeSheet} className="px-4 py-2 text-right">
+                    <button className='px-3 py-1 bg-blue-400 hover:bg-blue-500 rounded-lg text-black'>
+                      Add
+                    </button>
                   </td>
                 </tr>
               }
