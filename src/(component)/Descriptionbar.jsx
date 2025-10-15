@@ -310,7 +310,7 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
                     key={index}
                     className="w-12 h-12 border-2 border-white rounded-full bg-blue-600 dark:border-gray-800 text-white flex items-center justify-center font-semibold uppercase" title={assign}
                   >
-                    {assign.substring(0, 2) || "NA"}
+                    {assign.name.substring(0, 2) || "NA"}
                   </div>
                 ))}
               </>
@@ -355,22 +355,20 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
 
         <table className="border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-700 rounded-lg text-gray-900 dark:text-white mt-4 p-4 w-full">
           <tr className='flex item-center my-2'>
-            <td className='flex'>
-              <svg class="w-6 h-6 text-gray-800 dark:text-white mx-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.8 13.938h-.011a7 7 0 1 0-11.464.144h-.016l.14.171c.1.127.2.251.3.371L12 21l5.13-6.248c.194-.209.374-.429.54-.659l.13-.155Z" />
+            <td className='flex item-center'>
+              <svg className="text-gray-900 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z" />
               </svg>
-              <strong>Time Estimated :</strong>
+              <strong className='mx-2'>Time Estimated :</strong>
             </td>
             <td className='ml-5 mr-28'>
               {currentTask.time_estimate}
             </td>
             <td className='flex'>
-              <svg class="w-6 h-6 text-gray-800 dark:text-white mx-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.8 13.938h-.011a7 7 0 1 0-11.464.144h-.016l.14.171c.1.127.2.251.3.371L12 21l5.13-6.248c.194-.209.374-.429.54-.659l.13-.155Z" />
+              <svg className="text-gray-900 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z" />
               </svg>
-              <strong>Time :</strong>
+              <strong className='mx-2'>Spent Time :</strong>
             </td>
             <td className='px-5'>
               {currentTask.time_estimate}
@@ -378,11 +376,11 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
           </tr>
           <tr className='flex item-center my-2'>
             <td className='flex'>
-              <svg class="w-6 h-6 text-gray-800 dark:text-white mx-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.8 13.938h-.011a7 7 0 1 0-11.464.144h-.016l.14.171c.1.127.2.251.3.371L12 21l5.13-6.248c.194-.209.374-.429.54-.659l.13-.155Z" />
+              <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path fill-rule="evenodd" d="M5.005 10.19a1 1 0 0 1 1 1v.233l5.998 3.464L18 11.423v-.232a1 1 0 1 1 2 0V12a1 1 0 0 1-.5.866l-6.997 4.042a1 1 0 0 1-1 0l-6.998-4.042a1 1 0 0 1-.5-.866v-.81a1 1 0 0 1 1-1ZM5 15.15a1 1 0 0 1 1 1v.232l5.997 3.464 5.998-3.464v-.232a1 1 0 1 1 2 0v.81a1 1 0 0 1-.5.865l-6.998 4.042a1 1 0 0 1-1 0L4.5 17.824a1 1 0 0 1-.5-.866v-.81a1 1 0 0 1 1-1Z" clip-rule="evenodd" />
+                <path d="M12.503 2.134a1 1 0 0 0-1 0L4.501 6.17A1 1 0 0 0 4.5 7.902l7.002 4.047a1 1 0 0 0 1 0l6.998-4.04a1 1 0 0 0 0-1.732l-6.997-4.042Z" />
               </svg>
-              <strong>{currentTask.numberOfSubTasks} Sub Tasks.</strong>
+              <strong className='mx-3'>{currentTask.numberOfSubTasks} Sub Tasks.</strong>
             </td>
           </tr>
         </table>
@@ -437,11 +435,13 @@ function Descriptionbar({ currentTask, role, setShowDescription, userId, setTask
                     {new Date(timeSheet.date).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-2">
-                    <span className='flex-1 ms-3 whitespace-nowrap'>{timeSheet.duration}</span>
+                    <span className='flex-1 ms-3 whitespace-nowrap'>
+                      {timeSheet.duration}{timeSheet.duration ? (timeSheet.duration < 10 ? (<span>h</span>) : (<span>m</span>)) : null}
+                    </span>
                   </td>
                   <td className="flex items-center px-6 py-2">
                     <span className='flex-1 ms-3 whitespace-nowrap'>{timeSheet.added_by.u_name}</span>
-                    <button onClick={()=> saveTimeSheet()}>
+                    <button onClick={() => saveTimeSheet()}>
                       <svg class="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
                         <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 6h.01M12 12h.01M12 18h.01" />
                       </svg>

@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react'
 import OutsideClickWrapper from '../(component)/OutsideClickWrapper';
-import { div } from 'framer-motion/client';
+import { div, span } from 'framer-motion/client';
 
-function Row({ task, showDescription, setShowDescription, setCurrentTask, subLevel, setTasklist, userId, parentTaskId, setParentSubTaskList, viewSideBar }) {
+function Row({ task, showDescription, setShowDescription, setCurrentTask, subLevel, setTasklist, userId, parentTaskId, setParentSubTaskList, viewSideBar, currentProjectId }) {
 
     const newRowRef = useRef(null);
 
@@ -27,9 +27,14 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
     const [showProjectUsers, setShowProjectUsers] = useState(false);
     const [showPriorityList, setShowPriorityList] = useState(false);
     const [showStatusList, setShowStatusList] = useState(false);
+    const [showTimeSheets, setShowTimeSheets] = useState(false);
     const [isTaskOptionOpen, setIsTaskOptionOpen] = useState(false);
     const [usersInProject, setUsersInProject] = useState();
     const [subtasks, setSubTasks] = useState([]);
+    const [timeSheets, setTimeSheets] = useState([]);
+
+    const [newTimeSheetDuration, setNewTimeSheetDuration] = useState();
+    const [newTimeSheetDate, setNewTimeSheetDate] = useState();
 
     useEffect(() => {
         const fetchSubTasks = async () => {
@@ -214,8 +219,9 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 newTask.task.project = task.project;
                 console.log("New task created:", newTask);
                 task.numberOfSubTasks += 1;
+                newTask.task.time_spent = { h: 0, min: 0 }
                 setSubTasks(prev => [...prev, newTask.task]);
-                // setNewRow(false);
+                setNewTaskTitle("");
             } else {
                 console.error("Error creating task:", newTask);
                 alert("Failed to create task");
@@ -253,6 +259,18 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
         setShowProjectUsers(prev => {
             if (taskId === prev?.taskId) {
                 return false; // Close if the same task
+            } else {
+                return { x: e.pageX, y: e.pageY, taskId };
+            }
+        });
+    };
+
+    const showTimeSheetList = (e, taskId) => {
+        e.preventDefault();
+        e.stopPropagation(); //prevent triggering parent onClick
+        setShowTimeSheets(prev => {
+            if (taskId === prev?.taskId) {
+                return false;
             } else {
                 return { x: e.pageX, y: e.pageY, taskId };
             }
@@ -315,6 +333,40 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
         }
     };
 
+    const saveTimeSheet = async () => {
+        if (!newTimeSheetDate || !newTimeSheetDuration) {
+            alert("Please fill in both Date and Duration before saving.");
+            return;
+        }
+
+        const res = await fetch('/api/new_time_sheet', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                taskId: task.t_id,
+                date: new Date(newTimeSheetDate),
+                duration: parseInt(newTimeSheetDuration, 10)
+            }),
+        })
+        const result = await res.json();
+        console.log("Saved Timesheet: ", result);
+        if (res.ok) {
+            if (result.timeSheet.duration < 10) {
+                task.time_spent.h = result.timeSheet.duration + task.time_spent.h;
+            } else {
+                task.time_spent.min = result.timeSheet.duration + task.time_spent.min;
+            }
+
+            setTimeSheets((prev) => [...prev, result.timeSheet]);
+            setNewTimeSheetDate("");
+            setNewTimeSheetDuration("");
+            // setShowTimeSheets(false);
+        } else {
+            console.error("Error creating time sheet:", result);
+            alert("Failed to create time sheet: " + result.error);
+        }
+    }
+
     const updateTask = async () => {
         try {
             const res = await fetch('/api/update_task', {
@@ -337,8 +389,13 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 const updatedTask = responce.task;
                 updatedTask.project = task.project;
                 updatedTask.added_by = task.added_by;
+                updatedTask.time_spent = task.time_spent;
                 console.log("updated task responce: ", updatedTask);
-                setTasklist(prev => prev.map(t => t.t_id === task.t_id ? updatedTask : t));
+                if (parentTaskId) {
+                    setParentSubTaskList(prev => prev.map(t => t.t_id === task.t_id ? updatedTask : t));
+                } else {
+                    setTasklist(prev => prev.map(t => t.t_id === task.t_id ? updatedTask : t));
+                }
             } else {
                 const errorData = await res.json();
                 console.error("Error updating task:", errorData);
@@ -402,8 +459,6 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
     const saveAssignment = async (user_id, user_name) => {
         try {
-            console.log("user_id::: ", user_id);
-            console.log("task_id::: ", task.t_id);
             const res = await fetch('/api/new_assignment', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -414,13 +469,32 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             });
             if (res.ok) {
                 const assign = await res.json();
-                setAssigns(prev => [...prev, user_name])
+                console.log("saved assignment: ", assign);
+                setAssigns(prev => [...prev, { id: user_id, name: user_name }]);
+
             }
             // setSubTasks(prev => [...prev, user_name]);
         } catch (error) {
             console.error("Error in new_assignment API call:", error);
             alert("An unexpected error occurred while creating the assignment.");
         }
+    }
+
+    const deleteAssignment = async (user_id) => {
+        const res = await fetch(`/api/delete_assignment?task_id=${task.t_id}&user_id=${user_id}`, {
+            method: 'DELETE',
+        });
+        const data = await res.json();
+        console.log("responce in delete_assignment:", data);
+        setAssigns((prev) => prev.filter((user) => user.id !== user_id));
+    }
+
+    async function fetchTimeSheets() {
+        console.log("Fetching time sheets for task ID:", task.t_id);
+        const res = await fetch(`/api/task_time_sheet?taskId=${task.t_id}`);
+        const timeSheets = await res.json();
+        setTimeSheets(timeSheets);
+        console.log("Task time sheets:", timeSheets);
     }
 
     return (
@@ -459,7 +533,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                 type="text"
                                 id="taskTitle"
                                 placeholder='Task name'
-                                className="text-gray-700 font-bold text-sm rounded-sm w-80 py-1 focus:outline-none focus:ring-0"
+                                className="text-gray-700 font-bold text-sm rounded-sm w-64 py-1 focus:outline-none focus:ring-0"
                                 value={taskTitle}
                                 onChange={(e) => setTaskTitle(e.target.value)}
                                 autoFocus
@@ -467,7 +541,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                             />
                         </OutsideClickWrapper>
                     ) : (
-                        <strong onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className={`block truncate transition-transform mt-1 hover:scale-[1.05] overflow-hidden text-ellipsis whitespace-nowrap ${viewSideBar ? 'w-80' : 'w-[400px]'}`} title={task.title}>{task.t_title}</strong>
+                        <strong onClick={() => { setShowDescription(!showDescription); setCurrentTask(task); }} className={`block truncate transition-transform mt-1 overflow-hidden text-ellipsis whitespace-nowrap ${viewSideBar ? 'w-64' : 'w-[400px]'}`} title={task.title}>{task.t_title}</strong>
                     )}
 
                 </th>
@@ -491,6 +565,13 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
 
                 </th>
 
+                {/* project */}
+                {!currentProjectId &&
+                    <td>
+                        {task.project.p_name}
+                    </td>
+                }
+
                 {/* asignees */}
                 <td onClick={() => { setCurrentTask(task); }} className="px-2 w-32">
                     <div className="w-[100px]">
@@ -501,11 +582,11 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                                         key={index}
                                         className="w-7 h-7 border-2 border-white rounded-full dark:border-gray-800 text-white text-xs bg-blue-700 flex items-center justify-center font-semibold uppercase" title={assign}
                                     >
-                                        {assign.substring(0, 2) || "NA"}
+                                        {assign.name.substring(0, 2) || "NA"}
                                     </div>
                                 ))
                                 }
-                                <div className="hidden group-hover/avatar:flex items-center justify-center w-7 h-7 text-xs font-medium text-white bg-gray-300 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }} title='Add Assi'>+</div>
+                                <div className="hidden group-hover/avatar:flex items-center justify-center w-7 h-7 text-xs font-medium text-white bg-gray-300 border-2 border-white rounded-full hover:bg-gray-600 dark:border-gray-800" onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }} title='Add Assignee'>+</div>
                             </div>
                         ) : (
                             <div className='text-xs hover:border hover:border-gray-400 rounded-md py-1 px-4' onClick={(e) => { showProjectUserList(e, task.t_id); fetchUsersInProject(); }}>
@@ -581,9 +662,9 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                             className={`w-fit`}
                         >
                             {/* {task.start_date ? formatSmartDate(task.start_date) : "due"} */}
-                            {task.due_date ?
+                            {task.start_date ?
                                 <div className='border border-transparent hover:border-gray-400 rounded py-1'>
-                                    {formatSmartDate(task.due_date)}
+                                    {formatSmartDate(task.start_date)}
                                 </div>
                                 :
                                 <div className='border border-transparent hover:border-gray-400 rounded-md py-1 px-4'>
@@ -613,56 +694,34 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     ) : (
                         <div className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
                             <div className="flex items-center">
-                                <svg className="text-gray-400 dark:text-white mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                                <svg className="text-gray-400 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
                                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z" />
                                 </svg>
-                                {task.time_estimate}
-                                {" "}
-                                {task.time_estimate ? (
-                                    task.time_estimate < 10 ? (
-                                        <span className="text-xs">h</span>
-                                    ) : (
-                                        <span className='text-xs'>min</span>
-                                    )
-                                ) : null}
-
+                                <span>
+                                    {task.time_estimate}
+                                    {task.time_estimate ? (
+                                        task.time_estimate < 10 ? (
+                                            <span>h</span>
+                                        ) : (
+                                            <span>m</span>
+                                        )
+                                    ) : null}
+                                </span>
                             </div>
                         </div>
                     )}
                 </td>
 
                 {/* time spent */}
-                <td onClick={() => { setEditTimeSpent(true) }} className='w-24'>
-                    {editTimeSpent ? (
-                        <OutsideClickWrapper onOutsideClick={() => { setEditTimeSpent(false); updateTask(); }}>
-                            <input
-                                type="number"
-                                id="timeSpent"
-                                // placeholder='Time Spent'
-                                className="text-gray-900 text-sm rounded-sm w-10 p-1 ml-3"
-                                value={timeSpent}
-                                onChange={(e) => setTimeSpent(e.target.value)}
-                                autoFocus
-                            />
-                        </OutsideClickWrapper>
-                    ) : (
-                        <div className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
-                            <div className="flex items-center">
-                                <svg className="text-gray-400 dark:text-white mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z" />
-                                </svg>
-                                {task.time_spent}
-                                {" "}
-                                {task.time_spent ? (
-                                    task.time_spent < 10 ? (
-                                        <span className="text-xs">h</span>
-                                    ) : (
-                                        <span className='text-xs'>min</span>
-                                    )
-                                ) : null}
-                            </div>
+                <td onClick={(e) => { showTimeSheetList(e, task.t_id); fetchTimeSheets(); }} className='w-24'>
+                    <div className="w-fit px-2 py-1 border border-transparent hover:border-gray-400 rounded">
+                        <div className="flex items-center">
+                            <svg className="text-gray-400 dark:text-white mr-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.5 4h-13m13 16h-13M8 20v-3.333a2 2 0 0 1 .4-1.2L10 12.6a1 1 0 0 0 0-1.2L8.4 8.533a2 2 0 0 1-.4-1.2V4h8v3.333a2 2 0 0 1-.4 1.2L13.957 11.4a1 1 0 0 0 0 1.2l1.643 2.867a2 2 0 0 1 .4 1.2V20H8Z" />
+                            </svg>
+                            {task.time_spent.h > 0 && <span>{task.time_spent.h}h&nbsp; </span>}{task.time_spent.min > 0 && <span>{task.time_spent.min}m </span>}
                         </div>
-                    )}
+                    </div>
                 </td>
 
                 {/* added by */}
@@ -690,7 +749,7 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                     {/* </div> */}
                 </td>
 
-            </tr >
+            </tr>
 
             {viewSubTasks && <>
                 {subtasks?.map((t, index) => (
@@ -749,22 +808,85 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
             {/* Assignee Dropdown */}
             <OutsideClickWrapper onOutsideClick={() => setShowProjectUsers(false)}>
                 {showProjectUsers &&
-                    <div className={`fixed z-10 w-40 p-2 bg-white border rounded-md shadow-lg ${showProjectUsers ? 'block' : 'hidden'}`} style={{ top: `${showProjectUsers.y + 20}px`, left: `${showProjectUsers.x - 100}px`, position: 'fixed' }}>
-                        {usersInProject?.map((u) => (
-
-                            <ul className="py-1 hover:bg-gray-100 cursor-pointer" onClick={() => { saveAssignment(u.u_id, u.u_name); setShowProjectUsers(false); }} key={u.u_id}>
-
-                                <li className='flex items-center'>
-                                    <div className="relative flex items-center space-x-2">
-                                        <div className="w-7 h-7 rounded-full text-white bg-blue-700 flex items-center justify-center font-semibold uppercase" title={u.u_name}>
-                                            {u.u_name?.substring(0, 2) || "NA"}
+                    <div
+                        className={`fixed z-10 w-fit p-2 bg-white border rounded-md shadow-lg ${showProjectUsers ? "block" : "hidden"
+                            }`}
+                        style={{
+                            top: `${showProjectUsers.y + 20}px`,
+                            left: `${showProjectUsers.x - 100}px`,
+                            position: "fixed",
+                        }}
+                    >
+                        {usersInProject &&
+                            usersInProject.some(u => !assigns.some(a => a.id === u.u_id)) && ( // ✅ show "Add" only if unassigned users exist
+                                <div className='ml-2 font-semibold'>Add</div>
+                            )}
+                        {usersInProject
+                            ?.filter(u => !assigns.some(a => a.id === u.u_id)) // ✅ only show unassigned users
+                            .map((u) => (
+                                <ul
+                                    key={u.u_id}
+                                    className="py-1 hover:bg-green-100 cursor-pointer"
+                                    onClick={() => {
+                                        saveAssignment(u.u_id, u.u_name);
+                                        setShowProjectUsers(false);
+                                    }}
+                                >
+                                    <li className="flex items-center justify-between">
+                                        <div className='flex items-center'>
+                                            <div className="relative flex items-center space-x-2 ml-2">
+                                                <div
+                                                    className="w-7 h-7 rounded-full text-white bg-blue-700 flex items-center justify-center font-semibold uppercase"
+                                                    title={u.u_name}
+                                                >
+                                                    {u.u_name?.substring(0, 2) || "NA"}
+                                                </div>
+                                            </div>
+                                            <strong className="mx-3">{u.u_name}</strong>
                                         </div>
-                                    </div>
-                                    <strong className='mx-3'>{u.u_name}</strong>
-                                </li>
-                            </ul>
-                        ))}
+                                        <svg className="w-3 h-3 mr-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
+                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 1v16M1 9h16" />
+                                        </svg>
+                                    </li>
+                                </ul>
+                            ))
+                        }
+                        {assigns && <>
+                            <div className='ml-2 font-semibold'>Remove</div>
+                            {assigns.map((u) => (
+                                <ul
+                                    key={u.id}
+                                    className="py-1 hover:bg-red-100 cursor-pointer"
+                                    onClick={() => {
+                                        deleteAssignment(u.id);
+                                        setShowProjectUsers(false);
+                                    }}
+                                >
+                                    <li className="flex items-center justify-between">
+
+                                        <div className='flex items-center'>
+                                            <div className="relative flex items-center space-x-2 ml-2">
+                                                <div
+                                                    className="w-7 h-7 rounded-full text-white bg-blue-700 flex items-center justify-center font-semibold uppercase"
+                                                    title={u.name}
+                                                >
+                                                    {u.name?.substring(0, 2) || "NA"}
+                                                </div>
+                                            </div>
+                                            <strong className="mx-3">{u.name}</strong>
+                                        </div>
+                                        <svg className="w-4 h-4 mr-3 text-gray-700 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6" />
+                                        </svg>
+                                    </li>
+                                </ul>
+                            ))}
+                        </>
+                        }
+
+
                     </div>
+
                 }
             </OutsideClickWrapper>
 
@@ -843,6 +965,46 @@ function Row({ task, showDescription, setShowDescription, setCurrentTask, subLev
                 }
             </OutsideClickWrapper>
 
+            {/* Time Sheet Dropdown */}
+            <OutsideClickWrapper onOutsideClick={() => setShowTimeSheets(false)}>
+                {showTimeSheets &&
+                    <div
+                        className={`fixed z-10 w-fit p-2 bg-white border rounded-md shadow-xl ${showTimeSheets ? "block" : "hidden"
+                            }`}
+                        style={{
+                            top: `${showTimeSheets.y + 20}px`,
+                            left: `${showTimeSheets.x - 230}px`,
+                            position: "fixed",
+                        }}
+                    >
+                        <div className="overflow-hidden rounded-lg border border-gray-300">
+                            <table className=''>
+                                <thead>
+                                    <tr className='bg-gray-100'>
+                                        <th className='p-2'>Date</th>
+                                        <th className='p-2'>Duration</th>
+                                        <th className='p-2'>Added by</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {timeSheets && timeSheets.map((timeSheet, index) => (
+                                        <tr>
+                                            <td className='p-2'>{new Date(timeSheet.date).toLocaleDateString()}</td>
+                                            <td className='p-2'>{timeSheet.duration}{timeSheet.duration ? (timeSheet.duration < 10 ? (<span>h</span>) : (<span>m</span>)) : null}</td>
+                                            <td className='p-2'>{timeSheet.added_by.u_name}</td>
+                                        </tr>
+                                    ))}
+                                    <tr>
+                                        <td className='px-2 pb-2'><input type="date" value={newTimeSheetDate} onChange={(e) => setNewTimeSheetDate(e.target.value)} className='py-1 border border-gray-300 rounded-md' autoFocus required /></td>
+                                        <td className='px-2 pb-2'><input type="number" value={newTimeSheetDuration} onChange={(e) => setNewTimeSheetDuration(e.target.value)} className='py-1 border border-gray-300 rounded-md w-24' autoFocus required /></td>
+                                        <td className='px-2 pb-2'><button onClick={saveTimeSheet} className='px-2 py-1 bg-blue-500 rounded-md text-white border border-black'>save</button></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </OutsideClickWrapper>
         </>
     )
 }

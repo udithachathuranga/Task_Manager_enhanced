@@ -10,6 +10,14 @@ function decodeJwt(token) {
     }
 }
 
+function getContent(duration, date) {
+  if (duration < 10) {
+    return `added time sheet (${duration} hours at ${date.split('T')[0]})`;
+  } else {
+    return `added time sheet (${duration} minutes at ${date.split('T')[0]})`;
+  }
+}
+
 export async function POST(req) {
     const token = req.cookies.get('token')?.value;
     const claims = token ? decodeJwt(token) : null;
@@ -27,6 +35,15 @@ export async function POST(req) {
         if (!existingTask) {
             return new Response(JSON.stringify({ error: 'Task does not exist' }), { status: 400 })
         }
+
+        const newActivity = await prisma.activity.create({
+            data: {
+                done_by_id: claims.userId,
+                related_task_id: taskId,
+                content: getContent(duration, date),
+                date: new Date()
+            },
+        })
 
         const NewTimeSheet = await prisma.timeSheet.create({
             data: {

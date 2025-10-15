@@ -202,10 +202,10 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                                 <ul className="pt-4 mb-4 space-y-2 font-medium">
                                     <li className='hover:cursor-pointer hover:shadow-md'>
                                         <div onClick={handleAllClick} className="flex transition-transform hover:scale-[1.05] items-center px-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
-                                            <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                                            <svg className="shrink-0 w-4 h-4 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
                                                 <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
                                             </svg>
-                                            <span className="flex-1 ms-3 whitespace-nowrap">All Tasks</span>
+                                            <span className="flex-1 ms-3 whitespace-nowrap font-semibold text-gray-500">All Tasks</span>
                                         </div>
                                     </li>
                                 </ul>
@@ -218,14 +218,14 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                                         </h1>
                                     </div>
                                     {/* projects */}
-                                    <ul className="space-y-2 font-medium">
+                                    <ul className="space-y-1 font-semibold">
                                         {projects?.map((project, index) => (
                                             <li key={project.p_id}>
                                                 <div onClick={() => handleProjectClick(project.p_id, project.p_name, project.p_)} onContextMenu={(e) => handleContextMenu(e, project.p_id)} className="flex items-center px-2 py-1 text-gray-900 rounded-lg dark:text-white hover:shadow-md hover:cursor-pointer transition-transform hover:scale-[1.05] dark:hover:bg-gray-700 group">
-                                                    <svg className="shrink-0 w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
+                                                    <svg className="shrink-0 w-4 h-4 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 18">
                                                         <path d="M6.143 0H1.857A1.857 1.857 0 0 0 0 1.857v4.286C0 7.169.831 8 1.857 8h4.286A1.857 1.857 0 0 0 8 6.143V1.857A1.857 1.857 0 0 0 6.143 0Zm10 0h-4.286A1.857 1.857 0 0 0 10 1.857v4.286C10 7.169 10.831 8 11.857 8h4.286A1.857 1.857 0 0 0 18 6.143V1.857A1.857 1.857 0 0 0 16.143 0Zm-10 10H1.857A1.857 1.857 0 0 0 0 11.857v4.286C0 17.169.831 18 1.857 18h4.286A1.857 1.857 0 0 0 8 16.143v-4.286A1.857 1.857 0 0 0 6.143 10Zm10 0h-4.286A1.857 1.857 0 0 0 10 11.857v4.286c0 1.026.831 1.857 1.857 1.857h4.286A1.857 1.857 0 0 0 18 16.143v-4.286A1.857 1.857 0 0 0 16.143 10Z" />
                                                     </svg>
-                                                    <span className="flex-1 ms-3 whitespace-nowrap text-1xl">{project.p_name}</span>
+                                                    <span className="flex-1 ms-3 whitespace-nowrap text-gray-500 text-1xl">{project.p_name}</span>
                                                     {/* <button>
                                                         <svg className="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
                                                             <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01" />
@@ -238,7 +238,7 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
 
                                     {/* adding a new project */}
                                     {role == "1" &&
-                                        <ul className="pt-2 space-y-2 font-medium dark:border-gray-700">
+                                        <ul className=" space-y-2 font-medium dark:border-gray-700">
                                             <li>
                                                 <Link href="/newproject" className="flex items-center p-2 text-gray-300 duration-75 rounded-lg transition-transform hover:scale-[1.05] hover:text-black dark:hover:text-gray-700 dark:text-white group">
                                                     <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
@@ -262,15 +262,15 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
                                             </h1>
                                         </div>
 
-                                        <ul className="mt-4 space-y-2 font-medium border-t border-gray-100 dark:border-gray-700">
+                                        <ul className="mt-4 mr-2 space-y-1 font-medium border-t border-gray-100 dark:border-gray-700">
                                             {users?.map((user, index) => (
                                                 <li key={user.u_id}>
-                                                    <div onClick={() => handleUserClick(user.u_id, user.u_name)} onContextMenu={(e) => handleContextMenu_user(e, user.u_id)} className="flex items-center px-2 py-1 text-gray-900 rounded-lg transition-transform hover:scale-[1.05] dark:text-white hover:cursor-pointer hover:shadow-md dark:hover:bg-gray-700 group">
-                                                        <svg class="w-6 h-6 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                    <div onClick={() => handleUserClick(user.u_id, user.u_name)} onContextMenu={(e) => handleContextMenu_user(e, user.u_id)} className="flex items-center py-1 text-gray-900 rounded-lg transition-transform hover:scale-[1.05] dark:text-white hover:cursor-pointer hover:shadow-md dark:hover:bg-gray-700 group">
+                                                        <svg class="w-6 h-6 text-gray-500 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
                                                             <path fill-rule="evenodd" d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm-2 9a4 4 0 0 0-4 4v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-1a4 4 0 0 0-4-4h-4Z" clip-rule="evenodd" />
                                                         </svg>
 
-                                                        <span className="flex-1 ms-3 whitespace-nowrap">{user.u_name}</span>
+                                                        <span className="flex-1 ms-3 whitespace-nowrap font-semibold text-gray-500">{user.u_name}</span>
                                                         {/* <button>
                                                             <svg className="w-6 h-6 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg">
                                                                 <path stroke="currentColor" strokeLinecap="round" strokeWidth="2" d="M12 6h.01M12 12h.01M12 18h.01" />
@@ -283,7 +283,7 @@ function Sidebar({ user_id, role, setTasklist, setTopic, setIsEnableAddTask, set
 
                                         </ul>
 
-                                        <ul className="pt-2 space-y-2 font-medium">
+                                        <ul className="space-y-2 font-medium">
                                             <li>
                                                 <Link href="/newuser" className="flex items-center p-2 text-gray-300 duration-75 rounded-lg transition-transform hover:scale-[1.05] hover:text-black dark:hover:bg-gray-700 dark:text-white group">
                                                     <svg className="w-3.5 h-3.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">

@@ -93,12 +93,12 @@ export default function Home() {
       setProductionTasks([]);
       setCompletedTasks([]);
     } else {
-      setToDoTasks(tasklist.filter(task => task.task_status_id === "1"));
-      setOnHoldTasks(tasklist.filter(task => task.task_status_id === "2"));
-      setInProgressTasks(tasklist.filter(task => task.task_status_id === "3"));
-      setQaTasks(tasklist.filter(task => task.task_status_id === "4"));
-      setProductionTasks(tasklist.filter(task => task.task_status_id === "5"));
-      setCompletedTasks(tasklist.filter(task => task.task_status_id === "6"));
+      setToDoTasks(tasklist?.filter(task => task.task_status_id === "1"));
+      setOnHoldTasks(tasklist?.filter(task => task.task_status_id === "2"));
+      setInProgressTasks(tasklist?.filter(task => task.task_status_id === "3"));
+      setQaTasks(tasklist?.filter(task => task.task_status_id === "4"));
+      setProductionTasks(tasklist?.filter(task => task.task_status_id === "5"));
+      setCompletedTasks(tasklist?.filter(task => task.task_status_id === "6"));
       console.log("todo tasks: ", toDoTasks);
       console.log("onhold tasks: ", onHoldTasks);
       console.log("inprogress tasks: ", inProgressTasks);
@@ -169,6 +169,7 @@ export default function Home() {
             <Table statusId="5" tasks={productionTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} viewSideBar={viewSideBar} />
             <Table statusId="6" tasks={completedTasks} showDescription={showDescription} setShowDescription={setShowDescription} isEnableAddTask={isEnableAddTask} currentProjectId={currentProjectId} userId={u_id} setCurrentTask={setCurrentTask} setTasklist={setTasklist} viewSideBar={viewSideBar} />
           </div>
+          
         </div>
 
         {/* Description Bar */}
